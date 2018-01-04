@@ -40,8 +40,7 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
         this.maxWorkingAgents = maxWorking;
         this.agent = agent;
 
-        this.logService = LogManager.getLogServiceFactory().getLogService(getClass());
-
+        logService = LogManager.getLogServiceFactory().getLogService(getClass());
         status = new Status(this);
     }
 
@@ -86,7 +85,7 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
 
     @Override
     public int getNbWorking() {
-        return status != null ? status.runningCount() : -1;
+        return status.runningCount();
     }
 
     @Override

@@ -20,7 +20,6 @@ public class BaseEngineTest {
     private final File errorPath;
 
     private CountDownLatch countDownLatch;
-    private CountDownLatch agentCountDownLatch;
 
     public BaseEngineTest() throws IOException {
         logService = LogManager.getLogService(BaseEngineTest.class);
@@ -34,7 +33,6 @@ public class BaseEngineTest {
     public void mainTest() throws BaseEngineCreationException, InterruptedException {
 
         Engine engine = ProcessManager.getInstance().createEngine("test", errorPath);
-
         try {
             String channelName = "channel";
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
@@ -46,13 +44,15 @@ public class BaseEngineTest {
             Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
 
             countDownLatch = new CountDownLatch(1);
-            agentCountDownLatch = new CountDownLatch(1);
 
-            engine.plugChannel(new TestChannel(channelName));
+            TestChannel channel = new TestChannel(channelName);
+            engine.plugChannel(channel);
 
+            Assertions.assertThat(channel.isLocal()).isTrue();
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
             Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
+            Assertions.assertThat(channel.getNbWorking()).isEqualTo(0);
 
             engine.activateChannels();
 
@@ -60,6 +60,7 @@ public class BaseEngineTest {
 
             Assertions.assertThat(engine.isAvailable(channelName)).isTrue();
             Assertions.assertThat(engine.isBusy(channelName)).isTrue();
+            Assertions.assertThat(channel.getNbWorking()).isEqualTo(1);
 
             countDownLatch.countDown();
 
@@ -67,11 +68,16 @@ public class BaseEngineTest {
 
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
 
-            engine.unplugChannel(channelName);
-            Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
+            channel.setAvailable(false);
 
             engine.handle(channelName, "second message");
 
+            Assertions.assertThat(engine.isBusy(channelName)).isFalse();
+
+            engine.unplugChannel(channelName);
+            Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
+
+            channel.shutdown();
         } finally {
             engine.shutdown();
         }
@@ -80,6 +86,61 @@ public class BaseEngineTest {
         Assertions.assertThat(listFiles).isNotNull();
         Assertions.assertThat(listFiles.length).isEqualTo(1);
     }
+
+    @Test
+    public void testAgentException() throws BaseEngineCreationException, InterruptedException {
+        Engine engine = ProcessManager.getInstance().createEngine("test", errorPath);
+        try {
+            String channelName = "exception";
+
+            countDownLatch = new CountDownLatch(1);
+
+            TestChannel channel = new TestChannel(channelName);
+            engine.plugChannel(channel);
+
+            Assertions.assertThat(channel.isLocal()).isTrue();
+            Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
+            Assertions.assertThat(engine.isBusy(channelName)).isFalse();
+            Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
+
+            engine.activateChannels();
+
+            Assertions.assertThat(engine.isAvailable(channelName)).isTrue();
+            Assertions.assertThat(engine.isBusy(channelName)).isFalse();
+            Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
+
+            engine.handle(channelName, "exception message");
+
+            sleep(500);
+
+            Assertions.assertThat(engine.isBusy(channelName)).isTrue();
+
+            countDownLatch.countDown();
+
+            sleep(500);
+
+            Assertions.assertThat(engine.isAvailable(channelName)).isTrue();
+            Assertions.assertThat(engine.isBusy(channelName)).isFalse();
+
+        } finally {
+            ProcessManager.getInstance().shutdownEngine("test");
+        }
+    }
+
+    @Test(expected = BaseEngineCreationException.class)
+    public void testCreatedTwice() throws BaseEngineCreationException {
+        ProcessManager.getInstance().createEngine("test", errorPath);
+        Assertions.assertThat(ProcessManager.getInstance().getEngine("test")).isNotNull();
+        try {
+            ProcessManager.getInstance().createEngine("test", errorPath);
+        } finally {
+            ProcessManager.getInstance().shutdownEngine("test");
+
+            Assertions.assertThat(ProcessManager.getInstance().getEngine("test")).isNull();
+        }
+    }
+
+    // Utilities and classes
 
     private void sleep(int ms) throws InterruptedException {
         new CountDownLatch(1).await(ms, TimeUnit.MILLISECONDS);
@@ -90,6 +151,7 @@ public class BaseEngineTest {
         TestChannel(String channelName) {
             super(channelName, 5, new TestAgent());
         }
+
     }
 
     private class TestAgent implements Agent {
@@ -99,6 +161,9 @@ public class BaseEngineTest {
             try {
                 logService.info(() -> "TestAgent is waiting for the countDownLatch to be consumed");
                 countDownLatch.await();
+                if ("exception message".equals(message)) {
+                    throw new RuntimeException();
+                }
                 logService.info(() -> "TestAgent is working");
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);

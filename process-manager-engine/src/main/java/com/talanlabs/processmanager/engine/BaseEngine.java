@@ -144,7 +144,7 @@ public class BaseEngine implements Engine {
 
     private ChannelSlot buildChannelSlot(String channelName) {
         // This channel slot could not be found, create one and store messages...
-        logService.info(() -> "Couldn''t find {0}, creating one", channelName);
+        logService.info(() -> "Couldn''t find {0} channel slot, creating one", channelName);
 
         ChannelSlot channelslot = new ChannelSlotImpl(channelName, maxMsgCount);
         channelSlots.put(channelName, channelslot);

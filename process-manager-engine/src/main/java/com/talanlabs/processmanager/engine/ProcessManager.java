@@ -44,7 +44,11 @@ public class ProcessManager {
      */
     public boolean shutdownEngine(String uuid) {
         synchronized (engineMap) {
-            return engineMap.remove(uuid) != null;
+            Engine engine = engineMap.remove(uuid);
+            if (engine != null) {
+                engine.shutdown();
+            }
+            return engine != null;
         }
     }
 
