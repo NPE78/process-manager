@@ -1,9 +1,9 @@
 package com.talanlabs.processmanager.engine;
 
-import com.talanlabs.processmanager.shared.logging.LogManager;
-import com.talanlabs.processmanager.shared.logging.LogService;
 import com.talanlabs.processmanager.shared.ChannelSlot;
 import com.talanlabs.processmanager.shared.EngineListener;
+import com.talanlabs.processmanager.shared.logging.LogManager;
+import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.Serializable;
 
 public class DefaultEngineListener implements EngineListener {

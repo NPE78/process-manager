@@ -6,6 +6,7 @@ package com.talanlabs.processmanager.shared.logging;
 public final class LogManager {
 
     private static LogServiceFactory logServiceFactory;
+
     static {
         logServiceFactory = SLF4JLogServiceFactory.getInstance();
     }

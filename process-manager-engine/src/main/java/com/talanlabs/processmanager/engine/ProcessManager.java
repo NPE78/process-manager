@@ -1,8 +1,9 @@
 package com.talanlabs.processmanager.engine;
 
-import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.engine.exceptions.BaseEngineCreationException;
+import com.talanlabs.processmanager.shared.Engine;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,6 +17,10 @@ public class ProcessManager {
 
     public static ProcessManager getInstance() {
         return ProcessManager.SingletonHolder.instance;
+    }
+
+    public static void handle(String uuid, String channelName, Serializable message) {
+        getInstance().getEngine(uuid).handle(channelName, message);
     }
 
     /**
@@ -39,6 +44,7 @@ public class ProcessManager {
 
     /**
      * Shuts down the engine corresponding to the given uuid
+     *
      * @param uuid the unique uuid of the engine
      * @return true if the engine has stop, false otherwise
      */
