@@ -1,34 +1,32 @@
 package com.talanlabs.processmanager.engine;
 
-import com.talanlabs.processmanager.shared.logging.LogManager;
-import com.talanlabs.processmanager.shared.logging.LogService;
+import com.talanlabs.processmanager.engine.handlereport.BaseLocalHandleReport;
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Channel;
 import com.talanlabs.processmanager.shared.ChannelSlot;
 import com.talanlabs.processmanager.shared.HandleReport;
 import com.talanlabs.processmanager.shared.PluggableChannel;
-import com.talanlabs.processmanager.engine.handlereport.BaseLocalHandleReport;
+import com.talanlabs.processmanager.shared.logging.LogManager;
+import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public class ProcessingChannel extends AbstractChannel implements PluggableChannel {
 
-    private final static int NO_LOG = -1;
-    private final static int UNDERLOAD_LOG = 0;
-    private final static int OVERLOAD_LOG = 1;
+    private static final int NO_LOG = -1;
 
-    private final static int IDLING_LOG = 0;
-    private final static int BUSY_LOG = 1;
+    private static final int IDLING_LOG = 0;
+    private static final int BUSY_LOG = 1;
     private final LogService logService;
 
     private int maxWorkingAgents;
-    // private List agentThreads;
     private Agent agent;
 
     private boolean overloaded = false;
     private boolean busy = false;
-    private int lastLoggedLoad = NO_LOG;
     private int lastLoggedBusy = NO_LOG;
 
     private final Status status;
@@ -96,36 +94,6 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
         return "Processing Channel " + maxWorkingAgents + ", " + agent.getClass().getName() + ", " + status.runningCount() + " running, " + status.pendingCount() + " pending";
     }
 
-    private void notifyOverload() {
-        overloaded = true;
-
-        switch (lastLoggedLoad) {
-            case NO_LOG:
-            case UNDERLOAD_LOG:
-                logService.warn(() -> "OVERLOAD for service " + getName());
-                break;
-
-            default:
-                break;
-        }
-        lastLoggedLoad = OVERLOAD_LOG;
-    }
-
-    private void notifyUnderload() {
-        overloaded = false;
-
-        switch (lastLoggedLoad) {
-            case NO_LOG:
-            case OVERLOAD_LOG:
-                logService.debug(() -> "UNDERLOAD for service " + getName());
-                break;
-
-            default:
-                break;
-        }
-        lastLoggedLoad = UNDERLOAD_LOG;
-    }
-
     private void notifyIdling() {
         busy = false;
 
@@ -182,17 +150,11 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
         public void run() {
             try {
                 agent.work(message);
-            } catch (Throwable ex) {
+            } catch (Exception ex) {
                 logService.error(() -> "Uncatched exception in agent work : " + agent.getClass().getName(), ex);
             } finally {
                 processPool.doneProcess(Thread.currentThread());
             }
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            super.finalize();
-            message = null;
         }
     }
 
@@ -223,8 +185,8 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
         private final ProcessingChannel processingChannel;
 
         private Status(ProcessingChannel processingChannel) {
-            this.pendingList = new ArrayList<>();
-            this.runningList = new ArrayList<>();
+            this.pendingList = new LinkedList<>();
+            this.runningList = new LinkedList<>();
             this.processingChannel = processingChannel;
         }
 
@@ -254,7 +216,7 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
         void workDone(Thread thread) {
             synchronized (runningList) {
                 runningList.remove(thread);
-                if (runningList.size() == 0) {
+                if (runningList.isEmpty()) {
                     processingChannel.notifyIdling();
                 }
             }
@@ -272,11 +234,21 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
 
     private class ProcessMonitor extends Thread {
 
+        private final Semaphore semaphore;
+
         private boolean running;
 
         private ProcessMonitor(Channel channel) {
             super("PMONITOR_" + channel.getName());
             setDaemon(true);
+
+            semaphore = new Semaphore(1);
+            try {
+                // we want the semaphore to be consumed at first
+                semaphore.acquire();
+            } catch (InterruptedException e) {
+                logService.warn(() -> "Error initializing semaphore", e);
+            }
 
             running = false;
         }
@@ -286,28 +258,49 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
             running = true;
             try {
                 // while the channel is running or there are still pending messages, we loop
-                while (running || status.pendingCount() > 0) {
-                    synchronized (this) {
-                        wait(5000);
-                    }
-                    while (status.runningCount() < maxWorkingAgents) {
-                        try {
-                            if (!status.pushToWork(0)) {
-                                break;
-                            }
-                        } catch (Throwable e) {
-                            logService.error(() -> "PUSH TO WORK " + ProcessingChannel.this.getName(), e);
-                            wait(5000);
-                        }
-                    }
+                while (isActive()) {
+                    sleep();
+                    pushToWork();
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logService.error(() -> "InterruptedException " + ProcessingChannel.this.getName(), e);
             }
 
             // work is finished, we clear information
             processPool = null;
             available = false;
+        }
+
+        private void pushToWork() throws InterruptedException {
+            while (isActive() && status.runningCount() < maxWorkingAgents) {
+                try {
+                    if (!status.pushToWork(0)) {
+                        break;
+                    }
+                } catch (Exception e) {
+                    logService.error(() -> "PUSH TO WORK " + ProcessingChannel.this.getName(), e);
+                    sleep();
+                }
+            }
+        }
+
+        private boolean isActive() {
+            return running || status.pendingCount() > 0;
+        }
+
+        /**
+         * Sleep for 5 secs
+         *
+         * @throws InterruptedException an exception is thrown if the wait is interrupted, one way or another
+         */
+        private void sleep() throws InterruptedException {
+            synchronized (this) {
+                semaphore.tryAcquire(5, TimeUnit.SECONDS);
+            }
+        }
+
+        protected void wakeUp() {
+            semaphore.release();
         }
 
         public void shutdown() {
@@ -319,6 +312,8 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
             } else {
                 logService.info(() -> "ProcessingChannel {0} has been shut down", ProcessingChannel.this.getName());
             }
+
+            wakeUp();
         }
     }
 
@@ -339,7 +334,7 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
 
         void notifyMonitor() {
             synchronized (monitor) {
-                monitor.notify();
+                monitor.wakeUp();
             }
         }
 

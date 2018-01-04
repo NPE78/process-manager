@@ -44,10 +44,8 @@ public class BaseEngine implements Engine {
 
         this.channelSlots = new ConcurrentHashMap<>();
 
-        if (!this.errorPath.exists()) {
-            if (!this.errorPath.mkdirs()) {
-                logService.warn(() -> "Couldn't create errorPath of base engine " + uuid);
-            }
+        if (!this.errorPath.exists() && !this.errorPath.mkdirs()) {
+            logService.warn(() -> "Couldn't create errorPath of base engine " + uuid);
         }
 
         this.listener = new DefaultEngineListener();
@@ -160,18 +158,22 @@ public class BaseEngine implements Engine {
         if (channelSlots != null && channelSlots.size() > 0) {
             for (String key : channelSlots.keySet()) {
                 ChannelSlot channelSlot = channelSlots.get(key);
-                if (!channelSlot.isPlugged() && channelSlot.getBufferedMessagesCount() > 0) {
-                    int cpt = 1;
-                    for (Serializable msg : channelSlot.getBufferedMessages()) {
-                        channelSlot.storeBufferedMessage(errorPath + "/" + channelSlot.getName(), msg, cpt++);
-                    }
-                }
+                storeMessages(channelSlot);
                 if (channelSlot.isPlugged()) {
                     channelSlot.getPluggedChannel().shutdown();
                 }
             }
         }
         logService.info(() -> "ProcessEngine {0} has been shut down. There may still be messages waiting to be processed", uuid);
+    }
+
+    private void storeMessages(ChannelSlot channelSlot) {
+        if (!channelSlot.isPlugged() && channelSlot.getBufferedMessagesCount() > 0) {
+            int cpt = 1;
+            for (Serializable msg : channelSlot.getBufferedMessages()) {
+                channelSlot.storeBufferedMessage(errorPath + "/" + channelSlot.getName(), msg, cpt++);
+            }
+        }
     }
 
     public class ChannelSlotImpl extends AbstractChannel implements ChannelSlot {
@@ -197,7 +199,7 @@ public class BaseEngine implements Engine {
                 logService.trace(() -> "There is no channel for " + getName());
             }
             saveMessage(message);
-            return new BaseDelayedHandleReport("0", this);
+            return new BaseDelayedHandleReport(this);
         }
 
         @Override
@@ -232,7 +234,7 @@ public class BaseEngine implements Engine {
                 if (savedMessages.size() < maxMsgCount) {
                     listener.notifySlotBuffering(this, message);
                     savedMessages.add(message);
-                } else if (savedMessages.size() > 0) {
+                } else if (!savedMessages.isEmpty()) {
                     listener.notifySlotTrashing(this, savedMessages.remove(0));
 
                     listener.notifySlotBuffering(this, message);
@@ -251,7 +253,7 @@ public class BaseEngine implements Engine {
         }
 
         private void flushMessages(PluggableChannel channel) {
-            while (savedMessages.size() > 0) {
+            while (!savedMessages.isEmpty()) {
                 Serializable msg = savedMessages.remove(0);
                 listener.notifySlotFlushing(this, msg);
                 HandleReport report = channel.acceptMessage(msg, this);
@@ -290,7 +292,7 @@ public class BaseEngine implements Engine {
         }
 
         public List<Serializable> getBufferedMessages() {
-            return savedMessages;
+            return new ArrayList<>(savedMessages);
         }
 
         @Override

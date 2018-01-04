@@ -24,30 +24,50 @@ public class SLF4JLogService implements LogService {
     public void log(@NotNull LogLevel level, Supplier<String> message, Throwable exception) {
         switch (level) {
             case TRACE:
-                if (logger.isTraceEnabled()) {
-                    logger.trace(message.get(), exception);
-                }
+                logTrace(message, exception);
                 break;
             case DEBUG:
-                if (logger.isDebugEnabled()) {
-                    logger.debug(message.get(), exception);
-                }
+                logDebug(message, exception);
                 break;
             case INFO:
-                if (logger.isInfoEnabled()) {
-                    logger.info(message.get(), exception);
-                }
+                logInfo(message, exception);
                 break;
             case WARNING:
-                if (logger.isWarnEnabled()) {
-                    logger.warn(message.get(), exception);
-                }
+                logWarn(message, exception);
                 break;
             case ERROR:
-                if (logger.isErrorEnabled()) {
-                    logger.error(message.get(), exception);
-                }
+                logError(message, exception);
                 break;
+        }
+    }
+
+    private void logTrace(Supplier<String> message, Throwable exception) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(message.get(), exception);
+        }
+    }
+
+    private void logDebug(Supplier<String> message, Throwable exception) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(message.get(), exception);
+        }
+    }
+
+    private void logInfo(Supplier<String> message, Throwable exception) {
+        if (logger.isInfoEnabled()) {
+            logger.info(message.get(), exception);
+        }
+    }
+
+    private void logWarn(Supplier<String> message, Throwable exception) {
+        if (logger.isWarnEnabled()) {
+            logger.warn(message.get(), exception);
+        }
+    }
+
+    private void logError(Supplier<String> message, Throwable exception) {
+        if (logger.isErrorEnabled()) {
+            logger.error(message.get(), exception);
         }
     }
 }

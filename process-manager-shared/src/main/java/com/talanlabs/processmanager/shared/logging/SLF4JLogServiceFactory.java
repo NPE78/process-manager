@@ -15,7 +15,7 @@ public class SLF4JLogServiceFactory implements LogServiceFactory {
             return new SLF4JLogService(Class.forName(loggerName));
         } catch (ClassNotFoundException e) {
             LogService logService = new SLF4JLogService(loggerName);
-            logService.warn(() -> "Class of {0} could not be found!", loggerName);
+            logService.warn(() -> "Class of {0} could not be found!", e, loggerName);
             return logService;
         }
     }

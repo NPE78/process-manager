@@ -5,7 +5,7 @@ import com.talanlabs.processmanager.shared.DelayedHandleReport;
 
 public class BaseDelayedHandleReport extends BaseHandleReport implements DelayedHandleReport {
 
-    public BaseDelayedHandleReport(String sid, ChannelSlot slot) {
+    public BaseDelayedHandleReport(ChannelSlot slot) {
         super(slot);
     }
 }

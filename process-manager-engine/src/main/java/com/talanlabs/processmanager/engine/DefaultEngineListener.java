@@ -16,26 +16,32 @@ public class DefaultEngineListener implements EngineListener {
 
     @Override
     public void notifyHandle(String channelName, Object message) {
+        // default empty method
     }
 
     @Override
     public void notifyNewSlot(ChannelSlot slot) {
+        // default empty method
     }
 
     @Override
     public void notifySlotPlug(ChannelSlot slot) {
+        // default empty method
     }
 
     @Override
     public void notifySlotUnplug(ChannelSlot slot) {
+        // default empty method
     }
 
     @Override
     public void notifySlotBuffering(ChannelSlot slot, Serializable message) {
+        // default empty method
     }
 
     @Override
     public void notifySlotFlushing(ChannelSlot slot, Serializable message) {
+        // default empty method
     }
 
     @Override

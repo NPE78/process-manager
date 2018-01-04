@@ -10,6 +10,9 @@ public final class LogManager {
         logServiceFactory = SLF4JLogServiceFactory.getInstance();
     }
 
+    private LogManager() {
+    }
+
     public static LogServiceFactory getLogServiceFactory() {
         return logServiceFactory;
     }
