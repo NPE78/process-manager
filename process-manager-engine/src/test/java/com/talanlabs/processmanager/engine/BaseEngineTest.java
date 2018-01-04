@@ -8,6 +8,7 @@ import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
@@ -24,7 +25,9 @@ public class BaseEngineTest {
     public BaseEngineTest() throws IOException {
         logService = LogManager.getLogService(BaseEngineTest.class);
 
-        errorPath = File.createTempFile("test", "tmp").getParentFile();
+        File tmpFolder = File.createTempFile("test", "tmp").getParentFile();
+        errorPath = new File(tmpFolder, UUID.randomUUID().toString());
+        errorPath.mkdir();
     }
 
     @Test
@@ -63,9 +66,19 @@ public class BaseEngineTest {
             sleep(500);
 
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
+
+            engine.unplugChannel(channelName);
+            Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
+
+            engine.handle(channelName, "second message");
+
         } finally {
             engine.shutdown();
         }
+
+        File[] listFiles = errorPath.listFiles();
+        Assertions.assertThat(listFiles).isNotNull();
+        Assertions.assertThat(listFiles.length).isEqualTo(1);
     }
 
     private void sleep(int ms) throws InterruptedException {
