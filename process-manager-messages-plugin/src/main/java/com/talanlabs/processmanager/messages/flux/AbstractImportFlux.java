@@ -16,10 +16,6 @@ public abstract class AbstractImportFlux extends AbstractFlux implements IImport
 
     private String content;
 
-    public AbstractImportFlux() {
-        super();
-    }
-
     public final File getFile() {
         return file;
     }
