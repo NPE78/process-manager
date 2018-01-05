@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class AbstractImportFlux extends AbstractFlux implements IImportFlux {
+
+    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8"); //$NON-NLS-1$
 
     private File file;
 
@@ -46,9 +49,9 @@ public abstract class AbstractImportFlux extends AbstractFlux implements IImport
                 FileChannel fc = stream.getChannel();
                 MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
                 /* Instead of using default, pass in a decoder. */
-                result = Charset.forName("UTF-8").decode(bb).toString();
+                result = UTF8_CHARSET.decode(bb).toString();
             }
         }
-        return result;
+        return StringUtils.trimToEmpty(result);
     }
 }

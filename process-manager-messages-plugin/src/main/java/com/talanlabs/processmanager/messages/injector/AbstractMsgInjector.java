@@ -16,6 +16,7 @@ public abstract class AbstractMsgInjector implements MessageInjector {
         workDir = new File(rootPath);
     }
 
+    @Override
     public File getWorkDir() {
         return workDir;
     }

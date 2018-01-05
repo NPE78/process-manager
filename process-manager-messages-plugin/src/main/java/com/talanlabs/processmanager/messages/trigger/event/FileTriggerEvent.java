@@ -8,4 +8,8 @@ public class FileTriggerEvent extends BaseTriggerEvent<File> {
     public FileTriggerEvent(File file, Trigger source) {
         super(source, file);
     }
+
+    public boolean isNewFileEvent() {
+        return false;
+    }
 }

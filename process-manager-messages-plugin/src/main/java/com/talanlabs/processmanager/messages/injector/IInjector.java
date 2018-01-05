@@ -4,8 +4,6 @@ import java.io.File;
 
 /**
  * An interface for injectors
- *
- * @author Nicolas P
  */
 public interface IInjector {
 

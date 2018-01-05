@@ -24,9 +24,13 @@ public class BaseEngineTest {
     public BaseEngineTest() throws IOException {
         logService = LogManager.getLogService(BaseEngineTest.class);
 
-        File tmpFolder = File.createTempFile("test", "tmp").getParentFile();
+        File tempFile = File.createTempFile("baseEngineTest", "tmp");
+        File tmpFolder = tempFile.getParentFile();
         errorPath = new File(tmpFolder, UUID.randomUUID().toString());
         errorPath.mkdir();
+
+        tempFile.deleteOnExit();
+        errorPath.deleteOnExit();
     }
 
     @Test

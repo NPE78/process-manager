@@ -13,10 +13,12 @@ public abstract class AbstractTrigger implements Trigger {
         this.id = id;
     }
 
-    public String getID() {
+    @Override
+    public String getId() {
         return id;
     }
 
+    @Override
     public final synchronized void activate(TriggerEventListener triggerEventListener) {
         if (!isActive) {
             isActive = true;
@@ -24,6 +26,7 @@ public abstract class AbstractTrigger implements Trigger {
         }
     }
 
+    @Override
     public final synchronized void deactivate() {
         if (isActive) {
             isActive = false;
@@ -43,6 +46,7 @@ public abstract class AbstractTrigger implements Trigger {
      */
     protected abstract void doActivate(TriggerEventListener triggerEventListener);
 
+    @Override
     public boolean isActive() {
         return isActive;
     }

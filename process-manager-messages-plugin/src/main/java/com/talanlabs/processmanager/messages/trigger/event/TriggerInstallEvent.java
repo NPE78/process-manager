@@ -23,14 +23,14 @@ public final class TriggerInstallEvent extends BaseTriggerManagerEvent {
         this.isInstall = isInstall;
     }
 
-    public final Trigger getTrigger() {
+    public Trigger getTrigger() {
         return trigger;
     }
 
     /**
      * @return true if it is a install event, false if uninstall event
      */
-    public final boolean isInstall() {
+    public boolean isInstall() {
         return isInstall;
     }
 

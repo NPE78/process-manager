@@ -18,6 +18,7 @@ public @interface Flux {
 
     String fluxCode();
 
+
     /**
      * Extension used for export only. To be fixed?
      */

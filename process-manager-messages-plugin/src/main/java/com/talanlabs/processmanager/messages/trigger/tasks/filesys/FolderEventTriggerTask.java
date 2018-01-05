@@ -13,6 +13,9 @@ import java.util.Map;
 
 public class FolderEventTriggerTask extends AbstractTriggerTask {
 
+    /**
+     * If a file is called "trigger.stop", the trigger is paused
+     */
     private static final String STOP_FILE = "trigger.stop"; //$NON-NLS-1$
 
     private final Map<String, Long> lmdates;

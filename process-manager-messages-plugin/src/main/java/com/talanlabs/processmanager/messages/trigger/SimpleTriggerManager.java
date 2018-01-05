@@ -28,7 +28,7 @@ public class SimpleTriggerManager implements TriggerManager {
 
     public void installTrigger(Trigger trigger, boolean autoActivate) {
         synchronized (triggers) {
-            triggers.put(trigger.getID(), trigger);
+            triggers.put(trigger.getId(), trigger);
         }
         if (autoActivate) {
             trigger.activate(this);

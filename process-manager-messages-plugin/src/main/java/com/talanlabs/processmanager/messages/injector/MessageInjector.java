@@ -15,4 +15,5 @@ public interface MessageInjector {
     void setGate(Gate g);
 
     File getWorkDir();
+
 }

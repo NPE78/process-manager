@@ -30,7 +30,8 @@ public class BaseTriggerEvent<A> implements TriggerEvent {
         return attachment;
     }
 
+    @Override
     public String toString() {
-        return "TRIGGER_EVEN (from " + getSource().getID() + ") " + (attachment != null ? attachment.toString() : "no attachment");
+        return "TRIGGER_EVENT (from " + getSource().getId() + ") " + (attachment != null ? attachment.toString() : "no attachment");
     }
 }

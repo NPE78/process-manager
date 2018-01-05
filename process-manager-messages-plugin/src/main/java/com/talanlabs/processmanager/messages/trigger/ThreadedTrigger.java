@@ -22,6 +22,7 @@ public class ThreadedTrigger extends AbstractTrigger {
         hostingThread.start();
     }
 
+    @Override
     public String toString() {
         return "THREADED TRIGGER (task = " + task.toString() + ")";
     }
@@ -36,7 +37,7 @@ public class ThreadedTrigger extends AbstractTrigger {
         private long wait;
 
         HostingThread(ThreadedTrigger trigger, ThreadedTriggerTask task, TriggerEventListener triggerEventListener, long wait) {
-            super("TriggerThread_" + trigger.getID());
+            super("TriggerThread_" + trigger.getId());
             setDaemon(true);
 
             logService = LogManager.getLogService(getClass());

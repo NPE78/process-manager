@@ -8,7 +8,7 @@ public interface Trigger {
     /**
      * Unique ID of the trigger
      */
-    String getID();
+    String getId();
 
     /**
      * Is the trigger active?

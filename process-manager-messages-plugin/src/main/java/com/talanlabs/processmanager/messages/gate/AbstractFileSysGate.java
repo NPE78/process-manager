@@ -206,7 +206,7 @@ public abstract class AbstractFileSysGate implements Gate {
 
         TriggerEventListener tel = evt -> messageInjector.inject((FileTriggerEvent) evt);
 
-        logService.debug(() -> "AJOUT DU LISTENER AU TRIGGER ENGINE SUR : " + entranceFolder.getAbsolutePath());
+        logService.debug(() -> "ADD LISTENER TO TRIGGER ENGINE ON : " + entranceFolder.getAbsolutePath());
         te.addListener(tel);
 
         Trigger t = new ThreadedTrigger(name, new FolderEventTriggerTask(entranceFolder, ".lck"), 200);
