@@ -35,7 +35,9 @@ public class ImportFluxTest {
         }
 
         MyFlux flux = new MyFlux();
+        Assertions.assertThat(flux.getFile()).isNull();
         flux.setFile(file);
+        Assertions.assertThat(flux.getFile()).isNotNull();
 
         Assertions.assertThat(flux.getContent()).isEqualTo(content);
         Assertions.assertThat(flux.getFilename()).isEqualTo(filename);

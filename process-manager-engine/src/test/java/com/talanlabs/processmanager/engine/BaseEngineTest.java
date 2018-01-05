@@ -22,7 +22,7 @@ public class BaseEngineTest {
     private CountDownLatch countDownLatch;
 
     public BaseEngineTest() throws IOException {
-        logService = LogManager.getLogService(BaseEngineTest.class);
+        logService = LogManager.getLogService(getClass());
 
         File tempFile = File.createTempFile("baseEngineTest", "tmp");
         File tmpFolder = tempFile.getParentFile();
@@ -56,7 +56,7 @@ public class BaseEngineTest {
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
             Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
-            Assertions.assertThat(channel.getNbWorking()).isEqualTo(0);
+            Assertions.assertThat(engine.getNbWorking(channelName)).isEqualTo(0);
 
             engine.activateChannels();
 
@@ -64,7 +64,7 @@ public class BaseEngineTest {
 
             Assertions.assertThat(engine.isAvailable(channelName)).isTrue();
             Assertions.assertThat(engine.isBusy(channelName)).isTrue();
-            Assertions.assertThat(channel.getNbWorking()).isEqualTo(1);
+            Assertions.assertThat(engine.getNbWorking(channelName)).isEqualTo(1);
 
             countDownLatch.countDown();
 
@@ -72,7 +72,7 @@ public class BaseEngineTest {
 
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
 
-            channel.setAvailable(false);
+            engine.setAvailable(channelName, false);
 
             engine.handle(channelName, "second message");
 
@@ -134,8 +134,8 @@ public class BaseEngineTest {
     @Test(expected = BaseEngineCreationException.class)
     public void testCreatedTwice() throws BaseEngineCreationException {
         ProcessManager.getInstance().createEngine("test", errorPath);
-        Assertions.assertThat(ProcessManager.getInstance().getEngine("test").toString()).isEqualTo("Base Engine test");
-        Assertions.assertThat(ProcessManager.getInstance().getEngine("test")).isNotNull();
+        Assertions.assertThat(ProcessManager.getEngine("test").toString()).isEqualTo("Base Engine test");
+        Assertions.assertThat(ProcessManager.getEngine("test")).isNotNull();
         try {
             ProcessManager.getInstance().createEngine("test", errorPath);
         } finally {

@@ -6,7 +6,6 @@ import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("PMD.LoggerIsNotStaticFinal")
 public class SLF4JLogService implements LogService {
 
     private final Logger logger;

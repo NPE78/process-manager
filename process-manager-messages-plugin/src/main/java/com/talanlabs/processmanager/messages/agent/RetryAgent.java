@@ -5,7 +5,7 @@ import com.talanlabs.processmanager.messages.flux.AbstractFlux;
 import com.talanlabs.processmanager.shared.Agent;
 import java.io.Serializable;
 
-public class RetryAgent implements Agent {
+public final class RetryAgent implements Agent {
 
     @Override
     public void work(Serializable message, String engineUuid) {

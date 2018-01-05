@@ -1,12 +1,3 @@
-/*
- * Fichier : AbstractFileSysGate.java
- * Projet  : GPSTrainsServeurs
- * Date    : 2 dec. 2004
- * Auteur  : sps
- * -----------------------------------------------------------------------------
- * CVS :
- * $Header: /home/cvs_gpstrains/GPSTrainsServeurs/src/com/gpstrains/serveurs/AbstractFileSysGate.java,v 1.6 2005/02/16 11:05:15 bpt Exp $
- */
 package com.talanlabs.processmanager.messages.gate;
 
 import com.talanlabs.processmanager.messages.injector.MessageInjector;
@@ -22,11 +13,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 public abstract class AbstractFileSysGate implements Gate {
 
     private static final String MOVE_IMPOSSIBLE_MSG = "IMPOSSIBLE TO MOVE THE FILE {0} TO {1}";
     private static final String FILE_DOESNOT_EXIST_MSG = "THE FILE {0} DOES NOT EXIST IN {1}";
+    private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 
     private final LogService logService;
 
@@ -113,7 +106,7 @@ public abstract class AbstractFileSysGate implements Gate {
         File lck = new File(entranceFolder, msgID + ".lck");
         try (OutputStream os = new FileOutputStream(nf)) {
             lck.createNewFile();
-            os.write(data.getBytes());
+            os.write(data.getBytes(CHARSET_UTF8));
             os.flush();
         } catch (IOException e) {
             logService.error(() -> "IOException", e);
@@ -159,16 +152,16 @@ public abstract class AbstractFileSysGate implements Gate {
     @Override
     public void retry(String msgID) {
         File f = resolveEntranceFile(msgID);
-        logService.info(() -> "REESSAI DU MESSAGE {0} ({1})", msgID, f.getAbsolutePath());
+        logService.info(() -> "RETRYING FILE {0} ({1})", msgID, f.getAbsolutePath());
         if (f.exists()) {
             boolean remove = f.renameTo(new File(retryFolder, msgID));
             if (remove) {
-                logService.debug(() -> "REESSAI DU MESSAGE {0} ({1})", msgID, f.getAbsolutePath());
+                logService.debug(() -> "RETRYING FILE {0} ({1})", msgID, f.getAbsolutePath());
             } else {
                 logService.warn(() -> MOVE_IMPOSSIBLE_MSG, msgID, f.getAbsolutePath());
             }
         } else {
-            logService.warn(() -> "LE MESSAGE {0} N'EXISTE PAS DANS {1}", msgID, f.getAbsolutePath());
+            logService.warn(() -> "FILE {0} DOES NOT EXIST IN {1}", msgID, f.getAbsolutePath());
         }
     }
 

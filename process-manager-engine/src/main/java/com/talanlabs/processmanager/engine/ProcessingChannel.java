@@ -293,9 +293,7 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
          * @throws InterruptedException an exception is thrown if the wait is interrupted, one way or another
          */
         private void sleep() throws InterruptedException {
-            synchronized (this) {
-                semaphore.tryAcquire(5, TimeUnit.SECONDS);
-            }
+            semaphore.tryAcquire(5, TimeUnit.SECONDS);
         }
 
         protected void wakeUp() {

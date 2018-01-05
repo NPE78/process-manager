@@ -1,4 +1,4 @@
-package com.talanlabs.processmanager.messages.model;
+package com.talanlabs.processmanager.messages.flux;
 
 import java.io.Serializable;
 
@@ -20,7 +20,7 @@ public class SendInformation implements Serializable {
         return messageContent;
     }
 
-    public void setMessageContent(String messageContent) {
+    void setMessageContent(String messageContent) {
         this.messageContent = messageContent;
     }
 }

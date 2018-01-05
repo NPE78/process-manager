@@ -1,6 +1,5 @@
 package com.talanlabs.processmanager.messages.flux;
 
-import com.talanlabs.processmanager.messages.listener.IMessageListener;
 import java.io.Serializable;
 
 public abstract class Flux implements Serializable {
@@ -27,17 +26,5 @@ public abstract class Flux implements Serializable {
     void setFilename(String filename) {
         this.filename = filename;
     }
-
-    /**
-     * Add a listener to detect the end of the treatment of a message
-     */
-    abstract void addMessageListener(IMessageListener messageListener);
-
-    /**
-     * Add a listener to detect the end of the treatment of a message, given a priority
-     */
-    abstract void addMessageListener(int index, IMessageListener messageListener);
-
-    abstract void fireMessageListener(IMessageListener.Status status);
 
 }

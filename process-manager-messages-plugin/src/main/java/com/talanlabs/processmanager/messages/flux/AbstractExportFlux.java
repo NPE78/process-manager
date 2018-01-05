@@ -1,6 +1,5 @@
 package com.talanlabs.processmanager.messages.flux;
 
-import com.talanlabs.processmanager.messages.model.SendInformation;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,6 +22,7 @@ public abstract class AbstractExportFlux extends AbstractFlux implements IExport
             fos.write(content.getBytes(CHARSET_UTF8));
         }
         setFilename(file.getName());
+        getSendInformation().setMessageContent(content);
         this.file = file;
     }
 

@@ -56,9 +56,4 @@ public interface ChannelSlot extends Channel {
      */
     void storeBufferedMessage(String foldername, Serializable message, int cpt);
 
-    /**
-     * Clear the list of saved messages
-     */
-    void clearSavedMessages();
-
 }

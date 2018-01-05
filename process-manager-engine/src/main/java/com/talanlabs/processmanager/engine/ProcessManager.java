@@ -20,7 +20,7 @@ public class ProcessManager {
     }
 
     public static void handle(String uuid, String channelName, Serializable message) {
-        getInstance().getEngine(uuid).handle(channelName, message);
+        getEngine(uuid).handle(channelName, message);
     }
 
     /**
@@ -61,7 +61,11 @@ public class ProcessManager {
     /**
      * Returns the engine associated to the given uuid
      */
-    public Engine getEngine(String uuid) {
+    public static Engine getEngine(String uuid) {
+        return getInstance().getEngineInternal(uuid);
+    }
+
+    private Engine getEngineInternal(String uuid) {
         synchronized (engineMap) {
             return engineMap.get(uuid);
         }

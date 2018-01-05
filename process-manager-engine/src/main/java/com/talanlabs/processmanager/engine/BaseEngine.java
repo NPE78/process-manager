@@ -122,6 +122,18 @@ public class BaseEngine implements Engine {
         return "Base Engine " + uuid;
     }
 
+    @Override
+    public void setAvailable(String channelName, boolean available) {
+        ChannelSlot channelSlot = resolveChannelSlot(channelName);
+        channelSlot.setAvailable(available);
+    }
+
+    @Override
+    public int getNbWorking(String channelName) {
+        ChannelSlot channelSlot = resolveChannelSlot(channelName);
+        return channelSlot.getNbWorking();
+    }
+
     /**
      * Called by the send method to return the ChannelSlot plugged (or to be plugged) on a named channel
      *
@@ -217,13 +229,6 @@ public class BaseEngine implements Engine {
                 return channel.getNbWorking();
             }
             return -1;
-        }
-
-        @Override
-        public void clearSavedMessages() {
-            synchronized (savedMessages) {
-                savedMessages.clear();
-            }
         }
 
         private synchronized void saveMessage(Serializable message) {

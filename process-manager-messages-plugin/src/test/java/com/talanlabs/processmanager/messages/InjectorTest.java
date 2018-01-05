@@ -32,21 +32,95 @@ public class InjectorTest {
     public void testInjector() throws IOException, InterruptedException {
         GateFactory gateFactory = new GateFactory();
         try {
-            MyInjector myInjector = new MyInjector();
+            MyInjector<MyFlux> myInjector = new MyInjector<>(MyFlux.class);
             gateFactory.buildGate("injectorTest", 500, myInjector);
 
             File file = new File(myInjector.getWorkDir(), "testFile");
             Assertions.assertThat(file.createNewFile()).isTrue();
-            File successFile = new File(myInjector.getAcceptedPath(), "testFile");
-            Assertions.assertThat(successFile).doesNotExist();
+            File expectedFile = new File(myInjector.getAcceptedPath(), "testFile");
+            Assertions.assertThat(expectedFile).doesNotExist();
 
-            sleep(1000);
+            sleep(1200);
 
             Assertions.assertThat(file).doesNotExist();
-            Assertions.assertThat(successFile).exists();
+            Assertions.assertThat(expectedFile).exists();
+
+            File expectedNewFile = new File(myInjector.getWorkDir(), "accepted/newFile");
+            myInjector.getGate().createNewFile("newFile", "my awesome content");
+            sleep(200);
+            Assertions.assertThat(expectedNewFile).exists();
+
+            myInjector.getGate().trash("newFile");
+            Assertions.assertThat(expectedNewFile).doesNotExist();
         } finally {
             gateFactory.closeGates();
         }
+    }
+
+    @Test
+    public void testFolders() throws IOException {
+        GateFactory gateFactory = new GateFactory();
+        MyInjector<MyFlux> myInjector = new MyInjector<>(MyFlux.class);
+        gateFactory.buildGate("injectorTest", 500, myInjector);
+        gateFactory.closeGates();
+
+        File accepted = new File(myInjector.getWorkDir(), "testAccepted");
+        File retry = new File(myInjector.getWorkDir(), "testRetry");
+        File rejected = new File(myInjector.getWorkDir(), "testRejected");
+        File archive = new File(myInjector.getWorkDir(), "accepted/testArchive");
+
+        Assertions.assertThat(accepted.createNewFile()).isTrue();
+        Assertions.assertThat(retry.createNewFile()).isTrue();
+        Assertions.assertThat(rejected.createNewFile()).isTrue();
+        Assertions.assertThat(archive.createNewFile()).isTrue();
+
+        File expectedAccepted = new File(myInjector.getAcceptedPath(), accepted.getName());
+        Assertions.assertThat(expectedAccepted).doesNotExist();
+        myInjector.getGate().accept(accepted.getName());
+        Assertions.assertThat(expectedAccepted).exists();
+
+        File expectedRetry = new File(myInjector.getRetryPath(), retry.getName());
+        Assertions.assertThat(expectedRetry).doesNotExist();
+        myInjector.getGate().retry(retry.getName());
+        Assertions.assertThat(expectedRetry).exists();
+
+        File expectedRejected = new File(myInjector.getRejectedPath(), rejected.getName());
+        Assertions.assertThat(expectedRejected).doesNotExist();
+        myInjector.getGate().reject(rejected.getName());
+        Assertions.assertThat(expectedRejected).exists();
+
+        File expectedArchive = new File(myInjector.getArchivePath(), archive.getName());
+        Assertions.assertThat(expectedArchive).doesNotExist();
+        myInjector.getGate().archive(archive.getName());
+        Assertions.assertThat(expectedArchive).exists();
+    }
+
+    @Test
+    public void testRetry() throws IOException, InterruptedException {
+        GateFactory gateFactory = new GateFactory();
+        try {
+            MyInjector<MyFlux> myInjector = new MyInjector<>(MyFlux.class);
+            gateFactory.buildGate("injectorTest", 500, myInjector);
+
+            File expectedFile = new File(myInjector.getAcceptedPath(), "testFile");
+            Assertions.assertThat(expectedFile).doesNotExist();
+
+            File file = new File(myInjector.getWorkDir(), "retry/testFile");
+            Assertions.assertThat(file.createNewFile()).isTrue();
+
+            sleep(1200);
+            Assertions.assertThat(file).doesNotExist();
+            Assertions.assertThat(expectedFile).exists();
+        } finally {
+            gateFactory.closeGates();
+        }
+    }
+
+    @Test
+    public void testInvalidFlux() {
+        MyInjector<MyInvalidFlux> myInjector = new MyInjector<>(MyInvalidFlux.class);
+
+        Assertions.assertThat(myInjector.getWorkDir().getAbsolutePath()).endsWith(File.separator + "null");
     }
 
     // Utilities and classes
@@ -56,22 +130,31 @@ public class InjectorTest {
     }
 
     @Flux(fluxCode = "injectorTest")
-    private class MyFlux extends AbstractImportFlux {
-
+    private static class MyFlux extends AbstractImportFlux {
+        public MyFlux() {
+        }
     }
 
-    private class MyInjector extends AbstractInjector<MyFlux> {
+    private static class MyInvalidFlux extends AbstractImportFlux {
+        public MyInvalidFlux() {
+        }
+    }
+
+    private class MyInjector<E extends AbstractImportFlux> extends AbstractInjector<E> {
 
         private final LogService logService;
+        private final Class<E> fluxClass;
 
-        private MyInjector() {
-            super(MyFlux.class, basePath.getAbsolutePath());
+        private MyInjector(Class<E> fluxClass) {
+            super(fluxClass, basePath.getAbsolutePath());
 
             logService = LogManager.getLogService(getClass());
+
+            this.fluxClass = fluxClass;
         }
 
         @Override
-        protected void handleFlux(MyFlux flux) {
+        protected void handleFlux(E flux) {
             File file = flux.getFile();
             File dest = new File(getAcceptedPath(), file.getName());
             boolean renamed = file.renameTo(dest);
@@ -80,8 +163,12 @@ public class InjectorTest {
         }
 
         @Override
-        public MyFlux createFlux() {
-            return new MyFlux();
+        public E createFlux() {
+            try {
+                return fluxClass.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

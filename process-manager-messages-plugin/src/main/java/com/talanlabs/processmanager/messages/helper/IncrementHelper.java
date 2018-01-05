@@ -1,22 +1,23 @@
 package com.talanlabs.processmanager.messages.helper;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 public class IncrementHelper {
 
-    private final SimpleDateFormat simpleDateFormat;
+    private final FastDateFormat dateFormat;
 
-    private Integer increment;
+    private volatile Integer increment;
 
-    private Calendar calendar;
+    private volatile Calendar calendar;
 
     private IncrementHelper() {
         super();
 
         this.calendar = Calendar.getInstance();
         this.increment = 0;
-        this.simpleDateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+
+        dateFormat = FastDateFormat.getInstance("yyyyMMdd_HHmmss");
 
         calendar.set(Calendar.MILLISECOND, 0);
     }
@@ -25,10 +26,9 @@ public class IncrementHelper {
         return IncrementHelper.SingletonHolder.instance;
     }
 
-    private synchronized Integer getIncrement() {
-        Calendar now = Calendar.getInstance();
+    private synchronized Integer getIncrement(Calendar now) {
         now.set(Calendar.MILLISECOND, 0);
-        if (now.compareTo(calendar) == 0) {
+        if (now.compareTo(calendar) <= 0) {
             increment++;
         } else {
             calendar = now;
@@ -44,7 +44,8 @@ public class IncrementHelper {
      * @return the computed string
      */
     public String getUniqueDate() {
-        return simpleDateFormat.format(calendar.getTime()) + "_" + getIncrement();
+        Calendar now = Calendar.getInstance();
+        return dateFormat.format(now.getTime()) + "_" + getIncrement(now);
     }
 
     /**

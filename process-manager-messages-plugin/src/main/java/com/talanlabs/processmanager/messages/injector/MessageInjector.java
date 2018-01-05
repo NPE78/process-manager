@@ -8,8 +8,6 @@ public interface MessageInjector {
 
     Object inject(FileTriggerEvent evt);
 
-    void manageResponse(String resp, File file);
-
     Gate getGate();
 
     void setGate(Gate g);
