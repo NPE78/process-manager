@@ -11,7 +11,7 @@ public interface LogService {
     void log(LogLevel level, Supplier<String> message, Throwable exception);
 
     default void trace(Supplier<Object> message) {
-        trace(() -> String.valueOf(message.get()), (Throwable) null);
+        trace(() -> String.valueOf(message.get()), null);
     }
 
     default void trace(Supplier<String> message, Throwable exception) {

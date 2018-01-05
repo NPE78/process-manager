@@ -21,26 +21,26 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
     private static final int IDLING_LOG = 0;
     private static final int BUSY_LOG = 1;
     private final LogService logService;
-
+    private final String engineUuid;
+    private final Status status;
     private int maxWorkingAgents;
     private Agent agent;
-
     private boolean overloaded = false;
     private boolean busy = false;
     private int lastLoggedBusy = NO_LOG;
-
-    private final Status status;
     private ProcessPool processPool;
 
     private boolean available = false;
 
-    public ProcessingChannel(String name, int maxWorking, Agent agent) {
+    public ProcessingChannel(String name, String engineUuid, int maxWorking, Agent agent) {
         super(name);
 
+        logService = LogManager.getLogServiceFactory().getLogService(getClass());
+
+        this.engineUuid = engineUuid;
         this.maxWorkingAgents = maxWorking;
         this.agent = agent;
 
-        logService = LogManager.getLogServiceFactory().getLogService(getClass());
         status = new Status(this);
     }
 
@@ -134,29 +134,6 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
         return new BaseLocalHandleReport(slot, agt);
     }
 
-    private class AgentRunnable implements Runnable {
-        private Agent agent;
-        private Serializable message;
-        private ProcessPool processPool;
-
-        private AgentRunnable(Agent agent, Serializable message, ProcessPool processPool) {
-            this.agent = agent;
-            this.message = message;
-            this.processPool = processPool;
-        }
-
-        @Override
-        public void run() {
-            try {
-                agent.work(message);
-            } catch (Exception ex) {
-                logService.error(() -> "Uncatched exception in agent work : " + agent.getClass().getName(), ex);
-            } finally {
-                processPool.doneProcess(Thread.currentThread());
-            }
-        }
-    }
-
     private static class AgentThread extends Thread {
 
         private ProcessingChannel pchannel;
@@ -174,6 +151,29 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
             pchannel.notifyBusy();
 
             super.run();
+        }
+    }
+
+    private class AgentRunnable implements Runnable {
+        private Agent agent;
+        private Serializable message;
+        private ProcessPool processPool;
+
+        private AgentRunnable(Agent agent, Serializable message, ProcessPool processPool) {
+            this.agent = agent;
+            this.message = message;
+            this.processPool = processPool;
+        }
+
+        @Override
+        public void run() {
+            try {
+                agent.work(message, engineUuid);
+            } catch (Exception ex) {
+                logService.error(() -> "Uncatched exception in agent work : " + agent.getClass().getName(), ex);
+            } finally {
+                processPool.doneProcess(Thread.currentThread());
+            }
         }
     }
 

@@ -23,18 +23,15 @@ public class BaseEngine implements Engine {
 
     private final Map<String, ChannelSlot> channelSlots;
     private final LogService logService;
-
-    private EngineListener listener;
-
-    private String uuid;
     private final File errorPath;
-
+    private EngineListener listener;
+    private String uuid;
     /**
      * Maximum number of retained messages
      */
     private int maxMsgCount;
 
-    public BaseEngine(String uuid, File errorPath) {
+    BaseEngine(String uuid, File errorPath) {
         this.logService = LogManager.getLogService(getClass());
 
         this.uuid = uuid;
@@ -177,9 +174,9 @@ public class BaseEngine implements Engine {
     }
 
     public class ChannelSlotImpl extends AbstractChannel implements ChannelSlot {
+        private final List<Serializable> savedMessages;
         private PluggableChannel channel;
         private int maxMsgCount;
-        private final List<Serializable> savedMessages;
 
         ChannelSlotImpl(String name, int maxMsgCount) {
             super(name);

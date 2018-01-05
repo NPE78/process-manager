@@ -17,6 +17,7 @@ public interface ChannelSlot extends Channel {
 
     /**
      * Is the channel slot plugged to a pluggable channel?
+     *
      * @return true if a pluggable channel is plugged, false otherwise
      */
     boolean isPlugged();
@@ -27,7 +28,6 @@ public interface ChannelSlot extends Channel {
     boolean isBusy();
 
     PluggableChannel getPluggedChannel();
-
 
     /**
      * Method to ask the channel to process a message.
@@ -49,9 +49,10 @@ public interface ChannelSlot extends Channel {
 
     /**
      * Store a message on the file system to back it up
+     *
      * @param foldername folder where the message must be saved
-     * @param message message to dump
-     * @param cpt A simple count to get a different file name for each stored message
+     * @param message    message to dump
+     * @param cpt        A simple count to get a different file name for each stored message
      */
     void storeBufferedMessage(String foldername, Serializable message, int cpt);
 

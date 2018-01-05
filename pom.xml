@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -44,6 +44,8 @@
         <log4j-slf4j-impl.version>2.10.0</log4j-slf4j-impl.version>
         <log4j-core.version>2.10.0</log4j-core.version>
         <javax-validation.version>1.1.0.Final</javax-validation.version>
+
+        <commons-lang3.version>3.6</commons-lang3.version>
     </properties>
 
 
@@ -85,7 +87,13 @@
         </dependency>
     </dependencies>
     <dependencyManagement>
-
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 
     <build>
@@ -140,6 +148,8 @@
     <modules>
         <module>process-manager-engine</module>
         <module>process-manager-shared</module>
+        <module>process-manager-messages-plugin</module>
+        <module>process-manager-guice-plugin</module>
     </modules>
 
 </project>

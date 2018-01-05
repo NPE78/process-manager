@@ -24,9 +24,13 @@ public class BaseEngineTest {
     public BaseEngineTest() throws IOException {
         logService = LogManager.getLogService(BaseEngineTest.class);
 
-        File tmpFolder = File.createTempFile("test", "tmp").getParentFile();
+        File tempFile = File.createTempFile("baseEngineTest", "tmp");
+        File tmpFolder = tempFile.getParentFile();
         errorPath = new File(tmpFolder, UUID.randomUUID().toString());
         errorPath.mkdir();
+
+        tempFile.deleteOnExit();
+        errorPath.deleteOnExit();
     }
 
     @Test
@@ -130,6 +134,7 @@ public class BaseEngineTest {
     @Test(expected = BaseEngineCreationException.class)
     public void testCreatedTwice() throws BaseEngineCreationException {
         ProcessManager.getInstance().createEngine("test", errorPath);
+        Assertions.assertThat(ProcessManager.getInstance().getEngine("test").toString()).isEqualTo("Base Engine test");
         Assertions.assertThat(ProcessManager.getInstance().getEngine("test")).isNotNull();
         try {
             ProcessManager.getInstance().createEngine("test", errorPath);
@@ -149,7 +154,7 @@ public class BaseEngineTest {
     private class TestChannel extends ProcessingChannel {
 
         TestChannel(String channelName) {
-            super(channelName, 5, new TestAgent());
+            super(channelName, "test", 5, new TestAgent());
         }
 
     }
@@ -157,7 +162,7 @@ public class BaseEngineTest {
     private class TestAgent implements Agent {
 
         @Override
-        public void work(Serializable message) {
+        public void work(Serializable message, String engineUuid) {
             try {
                 logService.info(() -> "TestAgent is waiting for the countDownLatch to be consumed");
                 countDownLatch.await();
