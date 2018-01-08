@@ -1,8 +1,8 @@
 package com.talanlabs.processmanager.engine;
 
-import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
+import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
@@ -15,6 +15,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public class BaseEngineTest {
+
+    public static final Engine.EnginePropertyKey<String> KEY = () -> String.class;
 
     private final LogService logService;
     private final File errorPath;
@@ -147,6 +149,18 @@ public class BaseEngineTest {
             ProcessManager.getInstance().shutdownEngine("test");
 
             Assertions.assertThat(ProcessManager.getEngine("test")).isNull();
+        }
+    }
+
+    @Test
+    public void testProperties() throws BaseEngineCreationException {
+        Engine engine = ProcessManager.getInstance().createEngine("test", errorPath);
+        try {
+            Assertions.assertThat(engine.getProperty(KEY)).isNotEqualTo("test property");
+            engine.setProperty(KEY, "test property");
+            Assertions.assertThat(engine.getProperty(KEY)).isEqualTo("test property");
+        } finally {
+            engine.shutdown();
         }
     }
 

@@ -34,6 +34,7 @@ public final class TriggerInstallEvent extends BaseTriggerManagerEvent {
         return isInstall;
     }
 
+    @Override
     public String toString() {
         return "Trigger '" + trigger.toString() + "' " + (isInstall() ? "Installed" : "Uninstalled");
     }
