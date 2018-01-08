@@ -4,6 +4,11 @@ import java.util.List;
 
 public interface Engine extends MessageHandler {
 
+    /**
+     * Returns the unique id of the engine
+     */
+    String getUuid();
+
     void plugChannel(PluggableChannel channel);
 
     void unplugChannel(String channelName);

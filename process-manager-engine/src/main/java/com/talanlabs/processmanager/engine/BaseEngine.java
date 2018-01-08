@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public final class BaseEngine implements Engine {
+/* package protected*/ final class BaseEngine implements Engine {
 
     private final Map<String, ChannelSlot> channelSlots;
     private final LogService logService;
@@ -54,6 +54,11 @@ public final class BaseEngine implements Engine {
     private void init() {
         channelSlots.clear();
         maxMsgCount = 10;
+    }
+
+    @Override
+    public String getUuid() {
+        return uuid;
     }
 
     @Override
@@ -113,7 +118,7 @@ public final class BaseEngine implements Engine {
     public void activateChannels() {
         synchronized (channelSlots) {
             for (ChannelSlot ch : channelSlots.values()) {
-                ch.activate();
+                ch.activate(getUuid());
             }
         }
     }
@@ -181,7 +186,7 @@ public final class BaseEngine implements Engine {
                 }
             }
         }
-        logService.info(() -> "ProcessEngine {0} has been shut down. There may still be messages waiting to be processed", uuid);
+        logService.info(() -> "BaseEngine {0} has been shut down. There may still be messages waiting to be processed to completely shutdown", uuid);
     }
 
     private void storeMessages(ChannelSlot channelSlot) {
@@ -306,10 +311,10 @@ public final class BaseEngine implements Engine {
         }
 
         @Override
-        public boolean activate() {
+        public boolean activate(String engineUuid) {
             boolean activated = false;
             if (channel != null) {
-                activated = channel.activate();
+                activated = channel.activate(engineUuid);
                 if (activated) {
                     flushMessages(channel);
                 }

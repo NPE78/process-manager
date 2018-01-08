@@ -23,7 +23,11 @@ public interface Channel {
 
     boolean isLocal();
 
-    boolean activate();
+    /**
+     * Activates the channel on the given engine uuid.
+     * If it already was activated on another engine, throws a ChannelStateException
+     */
+    boolean activate(String engineUuid);
 
     /**
      * At least one agent is working

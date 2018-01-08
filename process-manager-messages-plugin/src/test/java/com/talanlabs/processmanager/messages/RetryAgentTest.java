@@ -2,7 +2,7 @@ package com.talanlabs.processmanager.messages;
 
 import com.talanlabs.processmanager.engine.ProcessManager;
 import com.talanlabs.processmanager.engine.ProcessingChannel;
-import com.talanlabs.processmanager.engine.exceptions.BaseEngineCreationException;
+import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.messages.agent.RetryAgent;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.shared.Agent;
@@ -69,14 +69,14 @@ public class RetryAgentTest {
     private class MyChannel extends ProcessingChannel {
 
         MyChannel() {
-            super("channel", "testRetry", 5, new MyExceptionAgent());
+            super("channel", 5, new MyExceptionAgent());
         }
     }
 
     private class MyRetryChannel extends ProcessingChannel {
 
         MyRetryChannel() {
-            super("retryChannel", "testRetry", 5, new RetryAgent());
+            super("retryChannel", 5, new RetryAgent());
         }
     }
 
