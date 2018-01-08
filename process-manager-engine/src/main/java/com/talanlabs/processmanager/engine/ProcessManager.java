@@ -58,6 +58,12 @@ public class ProcessManager {
         }
     }
 
+    /* package protected */ void removeEngine(String engineUuid) {
+        synchronized (engineMap) {
+            engineMap.remove(engineUuid);
+        }
+    }
+
     /**
      * Returns the engine associated to the given uuid
      */

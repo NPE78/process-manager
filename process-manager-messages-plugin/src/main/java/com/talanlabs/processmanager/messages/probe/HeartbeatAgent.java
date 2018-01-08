@@ -1,19 +1,13 @@
 package com.talanlabs.processmanager.messages.probe;
 
 import com.talanlabs.processmanager.engine.ProcessManager;
-import com.talanlabs.processmanager.engine.ProcessingChannel;
-import com.talanlabs.processmanager.messages.exceptions.AlreadyStartedProbeException;
-import com.talanlabs.processmanager.shared.PluggableChannel;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
-import java.io.Serializable;
 
 /**
  * Heartbeat agent which handles a message on a specified channel
  */
-public class HeartbeatAgent implements ProbeAgent {
-
-    private final String channel;
+public class HeartbeatAgent extends AbstractProbeAgent {
 
     private final String beat;
 
@@ -27,38 +21,20 @@ public class HeartbeatAgent implements ProbeAgent {
      * @param delay   delay in ms
      */
     public HeartbeatAgent(String channel, String beat, long delay) {
-        super();
+        super(channel);
 
-        this.channel = channel;
         this.beat = beat;
         this.delay = delay;
     }
 
     @Override
-    public void work(Serializable message, String engineUuid) {
-        synchronized (this) {
-            if (SupportedMessages.STOP == message) {
-                shutdown();
-            }
-            // else, we ignore that message
-        }
+    public boolean isActive() {
+        return probe != null;
     }
 
     @Override
-    public String getChannel() {
-        return channel;
-    }
-
-    @Override
-    public void activate(String engineUuid) {
-        if (probe != null) {
-            throw new AlreadyStartedProbeException(getChannel());
-        }
-        PluggableChannel pluggableChannel = new ProcessingChannel("HEARTBEAT_" + channel, 1, this);
-        ProcessManager.getEngine(engineUuid).plugChannel(pluggableChannel);
-        pluggableChannel.activate(engineUuid);
-
-        probe = new HeartbeatProbe(engineUuid, delay, channel, beat);
+    public void activateProbe(String engineUuid) {
+        probe = new HeartbeatProbe(engineUuid, delay, getChannel(), beat);
         probe.start();
     }
 

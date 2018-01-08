@@ -7,7 +7,7 @@ public interface ProbeAgent extends Agent {
     enum SupportedMessages {
 
         /**
-         * To stop the probe agent, you can either send STOP_MESSAGE to the heartbeat channel (HEARTBEAT_channelName) or you can use #shutdown
+         * To stop the probe agent, you can either send STOP_MESSAGE to the heartbeat or cron channel (HeartbeatAgent_channelName or CronAgent_channelName) or you can use #shutdown
          */
         STOP
     }
@@ -26,5 +26,10 @@ public interface ProbeAgent extends Agent {
      * Shuts down the probe agent
      */
     void shutdown();
+
+    /**
+     * Returns true if the probe is active, false otherwise
+     */
+    boolean isActive();
 
 }
