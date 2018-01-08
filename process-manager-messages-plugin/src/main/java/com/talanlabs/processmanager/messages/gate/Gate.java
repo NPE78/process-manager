@@ -32,4 +32,5 @@ public interface Gate {
     void open();
 
     boolean isOpened();
+
 }

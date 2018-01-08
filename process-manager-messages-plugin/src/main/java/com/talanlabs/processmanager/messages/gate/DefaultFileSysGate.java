@@ -11,7 +11,8 @@ public class DefaultFileSysGate extends AbstractFileSysGate {
 
     public DefaultFileSysGate(String name, GateFolders gateFolders, long retryPeriod, MessageInjector injector) {
         super(name, gateFolders, retryPeriod, injector);
-        super.init();
+
+        init();
     }
 
     public DefaultFileSysGate(String name, File rootDir, long retryPeriod, MessageInjector injector) {

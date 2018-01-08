@@ -33,7 +33,7 @@ public class CronAgent implements ProbeAgent {
     @Override
     public void work(Serializable message, String engineUuid) {
         synchronized (this) {
-            if (STOP_MESSAGE == message) {
+            if (SupportedMessages.STOP == message) {
                 shutdown();
             }
             // else, we ignore that message

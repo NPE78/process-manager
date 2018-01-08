@@ -1,9 +1,8 @@
-package com.talanlabs.processmanager.messages;
+package com.talanlabs.processmanager.messages.gate;
 
+import com.talanlabs.processmanager.messages.agent.AbstractFileAgent;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
-import com.talanlabs.processmanager.messages.gate.GateFactory;
 import com.talanlabs.processmanager.messages.injector.AbstractInjector;
-import com.talanlabs.processmanager.messages.model.annotation.Flux;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
@@ -47,7 +46,7 @@ public class InjectorTest {
 
             File expectedNewFile = new File(myInjector.getWorkDir(), "accepted/newFile");
             myInjector.getGate().createNewFile("newFile", "my awesome content");
-            sleep(200);
+            sleep(600);
             Assertions.assertThat(expectedNewFile).exists();
 
             myInjector.getGate().trash("newFile");
@@ -116,11 +115,9 @@ public class InjectorTest {
         }
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testInvalidFlux() {
-        MyInjector<MyInvalidFlux> myInjector = new MyInjector<>(MyInvalidFlux.class);
-
-        Assertions.assertThat(myInjector.getWorkDir().getAbsolutePath()).endsWith(File.separator + "null");
+        new MyAgent<>(null);
     }
 
     // Utilities and classes
@@ -129,7 +126,6 @@ public class InjectorTest {
         new CountDownLatch(1).await(ms, TimeUnit.MILLISECONDS);
     }
 
-    @Flux(fluxCode = "injectorTest")
     private static class MyFlux extends AbstractImportFlux {
         public MyFlux() {
         }
@@ -140,13 +136,46 @@ public class InjectorTest {
         }
     }
 
+    private class MyAgent<E extends AbstractImportFlux> extends AbstractFileAgent<E> {
+
+        private final LogService logService;
+
+        private final Class<E> fluxClass;
+
+        private MyAgent(Class<E> fluxClass) {
+            super(fluxClass);
+
+            logService = LogManager.getLogService(getClass());
+
+            this.fluxClass = fluxClass;
+        }
+
+        @Override
+        protected E createFlux() {
+            try {
+                return fluxClass.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void doWork(E flux, String engineUuid) {
+            File file = flux.getFile();
+            File dest = new File(getAcceptedPath(), file.getName());
+            boolean renamed = file.renameTo(dest);
+            logService.info(() -> "file renamed to {0}? {1}", dest.getAbsolutePath(), renamed);
+            Assertions.assertThat(renamed).isTrue();
+        }
+    }
+
     private class MyInjector<E extends AbstractImportFlux> extends AbstractInjector<E> {
 
         private final LogService logService;
         private final Class<E> fluxClass;
 
         private MyInjector(Class<E> fluxClass) {
-            super(fluxClass, basePath.getAbsolutePath());
+            super(fluxClass.getSimpleName(), basePath.getAbsolutePath());
 
             logService = LogManager.getLogService(getClass());
 

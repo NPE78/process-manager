@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,11 +23,13 @@ import java.util.stream.Collectors;
 
 /* package protected*/ final class BaseEngine implements Engine {
 
+    private final String uuid;
     private final Map<String, ChannelSlot> channelSlots;
     private final LogService logService;
     private final File errorPath;
+    private final Map<EnginePropertyKey, Object> properties;
     private EngineListener listener;
-    private String uuid;
+
     /**
      * Maximum number of retained messages
      */
@@ -48,6 +51,8 @@ import java.util.stream.Collectors;
 
         this.listener = new DefaultEngineListener();
 
+        this.properties = new HashMap<>();
+
         init();
     }
 
@@ -64,6 +69,17 @@ import java.util.stream.Collectors;
     @Override
     public void setListener(EngineListener listener) {
         this.listener = listener;
+    }
+
+    @Override
+    public <V> void setProperty(EnginePropertyKey<V> key, V value) {
+        properties.put(key, value);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <V> V getProperty(EnginePropertyKey<V> key) {
+        return (V) properties.get(key);
     }
 
     @Override

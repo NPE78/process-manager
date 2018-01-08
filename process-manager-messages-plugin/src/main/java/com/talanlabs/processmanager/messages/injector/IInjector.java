@@ -5,7 +5,7 @@ import java.io.File;
 /**
  * An interface for injectors
  */
-public interface IInjector {
+public interface IInjector extends MessageInjector {
 
     /**
      * The name of the injector (and also agent)

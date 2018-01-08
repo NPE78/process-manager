@@ -18,6 +18,10 @@ public interface Engine extends MessageHandler {
      */
     void setListener(EngineListener listener);
 
+    <V> void setProperty(EnginePropertyKey<V> key, V value);
+
+    <V> V getProperty(EnginePropertyKey<V> key);
+
     /**
      * Returns the list of plugged channels
      */
@@ -43,4 +47,7 @@ public interface Engine extends MessageHandler {
      */
     int getNbWorking(String channelName);
 
+    interface EnginePropertyKey<V> {
+        Class<V> getType();
+    }
 }

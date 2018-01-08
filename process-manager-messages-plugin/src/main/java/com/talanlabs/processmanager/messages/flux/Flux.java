@@ -1,22 +1,17 @@
 package com.talanlabs.processmanager.messages.flux;
 
-import java.io.Serializable;
-
-public abstract class Flux implements Serializable {
+public abstract class Flux implements IFlux {
 
     private String name;
 
     private String filename;
 
-    /**
-     * Return the name of the flux (based on the {@link com.talanlabs.processmanager.messages.model.annotation.Flux} annotation)
-     */
-    public String getName() {
-        return name;
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getFilename() {
@@ -26,5 +21,4 @@ public abstract class Flux implements Serializable {
     void setFilename(String filename) {
         this.filename = filename;
     }
-
 }
