@@ -8,14 +8,24 @@ import java.util.List;
 public interface TriggerManager extends TriggerEventListener {
 
     /**
-     * Install a trigger
-     * @param trigger the trigger to install
+     * Install a trigger and notify an {@link com.talanlabs.processmanager.messages.trigger.event.TriggerInstallEvent} on the triggerManagerEventListener (see setTriggerManagerEventListener)
+     *
+     * @param trigger      the trigger to install, which has a unique id
      * @param autoActivate if true, activates the trigger
      */
     void installTrigger(Trigger trigger, boolean autoActivate);
 
+    /**
+     * Uninstall a trigger and notify a {@link com.talanlabs.processmanager.messages.trigger.event.TriggerInstallEvent} on the triggerManagerEventListener (see setTriggerManagerEventListener)
+     *
+     * @param id the id of the trigger to uninstall
+     */
     void uninstallTrigger(String id);
 
+    /**
+     *
+     * @param id
+     */
     void activateTrigger(String id);
 
     void deactivateTrigger(String id);
@@ -31,4 +41,5 @@ public interface TriggerManager extends TriggerEventListener {
     void setTriggerEventListener(TriggerEventListener triggerEventListener);
 
     void shutdown();
+
 }

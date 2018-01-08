@@ -46,6 +46,7 @@ public class BaseEngineTest {
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
             Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
+            Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
 
             countDownLatch = new CountDownLatch(1);
 
@@ -57,6 +58,7 @@ public class BaseEngineTest {
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
             Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
             Assertions.assertThat(engine.getNbWorking(channelName)).isEqualTo(0);
+            Assertions.assertThat(engine.getPluggedChannels()).hasSize(1);
 
             engine.activateChannels();
 
@@ -80,6 +82,7 @@ public class BaseEngineTest {
 
             engine.unplugChannel(channelName);
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
+            Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
 
             channel.shutdown();
         } finally {
@@ -141,7 +144,7 @@ public class BaseEngineTest {
         } finally {
             ProcessManager.getInstance().shutdownEngine("test");
 
-            Assertions.assertThat(ProcessManager.getInstance().getEngine("test")).isNull();
+            Assertions.assertThat(ProcessManager.getEngine("test")).isNull();
         }
     }
 

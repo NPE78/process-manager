@@ -5,7 +5,7 @@ import com.talanlabs.processmanager.shared.HandleReport;
 
 public class BaseHandleReport implements HandleReport {
 
-    private ChannelSlot slot;
+    private final ChannelSlot slot;
 
     BaseHandleReport(ChannelSlot slot) {
         this.slot = slot;

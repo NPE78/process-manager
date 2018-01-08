@@ -18,8 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
-public class BaseEngine implements Engine {
+public final class BaseEngine implements Engine {
 
     private final Map<String, ChannelSlot> channelSlots;
     private final LogService logService;
@@ -159,6 +160,13 @@ public class BaseEngine implements Engine {
         channelSlots.put(channelName, channelslot);
         listener.notifyNewSlot(channelslot);
         return channelslot;
+    }
+
+    @Override
+    public List<PluggableChannel> getPluggedChannels() {
+        synchronized (channelSlots) {
+            return channelSlots.values().stream().filter(ChannelSlot::isPlugged).map(ChannelSlot::getPluggedChannel).collect(Collectors.toList());
+        }
     }
 
     @Override

@@ -17,8 +17,7 @@ public class GateFactory {
         super();
 
         logService = LogManager.getLogService(getClass());
-
-        this.gateList = new ArrayList<>();
+        gateList = new ArrayList<>();
     }
 
     public Gate buildGate(String id, long delay, MessageInjector messageInjector) {

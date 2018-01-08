@@ -1,5 +1,6 @@
 package com.talanlabs.processmanager.messages.gate;
 
+import com.talanlabs.processmanager.messages.exceptions.InvalidGateStateException;
 import com.talanlabs.processmanager.messages.injector.MessageInjector;
 import com.talanlabs.processmanager.messages.trigger.ThreadedTrigger;
 import com.talanlabs.processmanager.messages.trigger.TriggerEngine;
@@ -14,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.stream.Stream;
 
 public abstract class AbstractFileSysGate implements Gate {
 
@@ -33,6 +35,7 @@ public abstract class AbstractFileSysGate implements Gate {
     private final MessageInjector messageInjector;
 
     private boolean opened;
+    private RetryThread retryThread;
 
     AbstractFileSysGate(String name, GateFolders gateFolders, long retryPeriod, MessageInjector injector) {
 
@@ -72,11 +75,6 @@ public abstract class AbstractFileSysGate implements Gate {
         }
 
         open();
-
-        if (retryPeriod > 0) {
-            // install reply thread
-            new RetryThread(retryPeriod, retryFolder, this).start();
-        }
     }
 
     private boolean mkdir(File folder) {
@@ -105,21 +103,41 @@ public abstract class AbstractFileSysGate implements Gate {
         logService.debug(() -> "Creating new File : " + nf.getAbsolutePath());
         File lck = new File(entranceFolder, msgID + ".lck");
         try (OutputStream os = new FileOutputStream(nf)) {
-            lck.createNewFile();
+            if (!lck.createNewFile()) {
+                logService.warn(() -> "Create lock {0} failed.", msgID);
+            }
             os.write(data.getBytes(CHARSET_UTF8));
             os.flush();
         } catch (IOException e) {
             logService.error(() -> "IOException", e);
         } finally {
-            lck.delete();
+            if (!lck.delete()) {
+                logService.warn(() -> "Delete lock {0} failed.", msgID);
+            }
         }
     }
 
     @Override
     public void reinject(String msgID) {
         File f = resolveRetryFile(msgID);
-        if (f.exists()) {
-            f.renameTo(resolveEntranceFile(msgID));
+        if (f.exists() && !f.renameTo(resolveEntranceFile(msgID))) {
+            logService.warn(() -> "Reinject {0} failed.", msgID);
+        }
+    }
+
+    @Override
+    public void trash(String msgID) {
+        File f = resolveAcceptedFile(msgID);
+        if (f.exists() && !f.delete()) {
+            logService.warn(() -> "Trash {0} failed.", msgID);
+        }
+    }
+
+    @Override
+    public void archive(String msgID) {
+        File f = resolveAcceptedFile(msgID);
+        if (f.exists() && !f.renameTo(new File(archiveFolder, msgID))) {
+            logService.warn(() -> "Archive {0} failed.", msgID);
         }
     }
 
@@ -166,22 +184,6 @@ public abstract class AbstractFileSysGate implements Gate {
     }
 
     @Override
-    public void trash(String msgID) {
-        File f = resolveAcceptedFile(msgID);
-        if (f.exists()) {
-            f.delete();
-        }
-    }
-
-    @Override
-    public void archive(String msgID) {
-        File f = resolveAcceptedFile(msgID);
-        if (f.exists()) {
-            f.renameTo(new File(archiveFolder, msgID));
-        }
-    }
-
-    @Override
     public void close() {
         TriggerEngine.getInstance().uninstallTrigger(name);
         opened = false;
@@ -194,29 +196,41 @@ public abstract class AbstractFileSysGate implements Gate {
 
     @Override
     public void open() {
+        if (isOpened()) {
+            throw new InvalidGateStateException("The gate is already opened");
+        }
+        if (retryThread != null) {
+            throw new InvalidGateStateException("Retry thread is still active");
+        }
         // install and start trigger
         TriggerEngine te = TriggerEngine.getInstance();
 
         TriggerEventListener tel = evt -> messageInjector.inject((FileTriggerEvent) evt);
 
-        logService.debug(() -> "ADD LISTENER TO TRIGGER ENGINE ON : " + entranceFolder.getAbsolutePath());
+        logService.debug(() -> "ADD LISTENER TO TRIGGER ENGINE ON: " + entranceFolder.getAbsolutePath());
         te.addListener(tel);
 
         Trigger t = new ThreadedTrigger(name, new FolderEventTriggerTask(entranceFolder, ".lck"), 200);
         te.installTrigger(t, true);
 
         opened = true;
+
+        if (retryPeriod > 0) {
+            // install retry thread
+            retryThread = new RetryThread(retryPeriod, retryFolder, this);
+            retryThread.start();
+        }
     }
 
-    static class RetryThread extends Thread {
+    private class RetryThread extends Thread {
 
         private final LogService logService;
 
-        private long retryPeriod;
-        private File retryFolder;
-        private Gate parentGate;
+        private final long retryPeriod;
+        private final File retryFolder;
+        private final Gate parentGate;
 
-        RetryThread(long retryPeriod, File retryFolder, Gate parentGate) {
+        private RetryThread(long retryPeriod, File retryFolder, Gate parentGate) {
             super();
             setDaemon(true);
 
@@ -230,12 +244,14 @@ public abstract class AbstractFileSysGate implements Gate {
         @Override
         public void run() {
             try {
-                while (true) {
+                while (opened) {
                     sleep(retryPeriod);
                     scanRetryFiles();
                 }
             } catch (Exception ex) {
                 logService.warn(() -> "ERROR {0} : {1}", ex, parentGate.getName(), ex.getMessage());
+            } finally {
+                retryThread = null;
             }
         }
 
@@ -244,11 +260,10 @@ public abstract class AbstractFileSysGate implements Gate {
          */
         private void scanRetryFiles() {
             File[] f = retryFolder.listFiles();
-            for (File aF : f) {
-                if (aF.isFile()) {
-                    parentGate.reinject(aF.getName());
-                }
+            if (f == null) {
+                return;
             }
+            Stream.of(f).filter(File::isFile).forEach(file -> parentGate.reinject(file.getName()));
         }
     }
 }

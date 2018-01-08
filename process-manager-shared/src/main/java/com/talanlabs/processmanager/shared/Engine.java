@@ -1,5 +1,7 @@
 package com.talanlabs.processmanager.shared;
 
+import java.util.List;
+
 public interface Engine extends MessageHandler {
 
     void plugChannel(PluggableChannel channel);
@@ -10,6 +12,11 @@ public interface Engine extends MessageHandler {
      * Sets a engine listener to be notified
      */
     void setListener(EngineListener listener);
+
+    /**
+     * Returns the list of plugged channels
+     */
+    List<PluggableChannel> getPluggedChannels();
 
     /**
      * Called when the process manager engine must shut down
