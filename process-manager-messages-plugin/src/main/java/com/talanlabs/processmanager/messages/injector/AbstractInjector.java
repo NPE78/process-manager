@@ -1,7 +1,6 @@
 package com.talanlabs.processmanager.messages.injector;
 
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
-import com.talanlabs.processmanager.messages.model.annotation.Flux;
 import com.talanlabs.processmanager.messages.trigger.event.FileTriggerEvent;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
@@ -10,36 +9,32 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * An abstract injector used to import flux<br>
- * Use annotation {@link Flux} to define a root work directory
  */
 public abstract class AbstractInjector<M extends AbstractImportFlux> extends AbstractMsgInjector implements IInjector {
 
     private final LogService logService;
 
-    private final Class<M> fluxClass;
+    private final String name;
 
     private final String acceptedPath;
-
     private final String retryPath;
-
     private final String rejectedPath;
-
     private final String archivePath;
 
     /**
      * Builds an injector dedicated to managing flux of the given type
      *
-     * @param fluxClass   the managed flux class
+     * @param name   the name of the flux (which is also the name of the final folder). Must be unique
      * @param baseWorkdir the base work directory (parent of where the injector folder will be located)
      */
-    public AbstractInjector(Class<M> fluxClass, String baseWorkdir) {
-        super();
+    public AbstractInjector(String name, String baseWorkdir) {
+        super(baseWorkdir);
 
         logService = LogManager.getLogService(getClass());
 
-        this.fluxClass = fluxClass;
+        this.name = name;
 
-        String workDir = StringUtils.appendIfMissing(baseWorkdir, File.separator) + getName() + File.separator;
+        String workDir = StringUtils.appendIfMissing(baseWorkdir, File.separator) + name + File.separator;
         this.acceptedPath = workDir + "accepted" + File.separator;
         this.retryPath = workDir + "retry" + File.separator;
         this.rejectedPath = workDir + "rejected" + File.separator;
@@ -47,20 +42,9 @@ public abstract class AbstractInjector<M extends AbstractImportFlux> extends Abs
         setWorkDir(new File(workDir));
     }
 
-    /**
-     * Name of the directory, also used for receiving messages using t_jms_binding
-     *
-     * @return directory name
-     */
     @Override
-    public final String getName() {
-        Flux fluxAnnotation = fluxClass.getAnnotation(Flux.class);
-        if (fluxAnnotation != null) {
-            return fluxAnnotation.fluxCode();
-        } else {
-            logService.warn(() -> "There is no Flux annotation for {0}. You should consider providing one", fluxClass.getName());
-        }
-        return null;
+    public String getName() {
+        return name;
     }
 
     /**

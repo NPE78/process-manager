@@ -1,6 +1,6 @@
 package com.talanlabs.processmanager.engine;
 
-import com.talanlabs.processmanager.engine.exceptions.BaseEngineCreationException;
+import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.Engine;
 import java.io.File;
 import java.io.Serializable;

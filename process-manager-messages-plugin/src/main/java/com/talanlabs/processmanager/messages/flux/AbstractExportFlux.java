@@ -17,6 +17,7 @@ public abstract class AbstractExportFlux extends AbstractFlux implements IExport
         return file;
     }
 
+
     public final void write(File file, String content) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(content.getBytes(CHARSET_UTF8));

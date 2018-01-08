@@ -4,9 +4,7 @@ public abstract class AbstractFlux extends Flux {
 
     private int retry;
 
-    AbstractFlux() {
-        super();
-
+    public AbstractFlux() {
         this.retry = 0;
     }
 

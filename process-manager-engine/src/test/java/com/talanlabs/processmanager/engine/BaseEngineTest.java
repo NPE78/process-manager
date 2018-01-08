@@ -1,6 +1,6 @@
 package com.talanlabs.processmanager.engine;
 
-import com.talanlabs.processmanager.engine.exceptions.BaseEngineCreationException;
+import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.logging.LogManager;
@@ -40,12 +40,14 @@ public class BaseEngineTest {
         try {
             String channelName = "channel";
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
+            Assertions.assertThat(engine.getUuid()).isEqualTo("test");
 
             engine.handle(channelName, "test message");
 
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
             Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
+            Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
 
             countDownLatch = new CountDownLatch(1);
 
@@ -57,6 +59,8 @@ public class BaseEngineTest {
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
             Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
             Assertions.assertThat(engine.getNbWorking(channelName)).isEqualTo(0);
+            Assertions.assertThat(engine.getPluggedChannels()).hasSize(1);
+            Assertions.assertThat(channel.getAgent().getClass().getSimpleName()).isEqualTo("TestAgent");
 
             engine.activateChannels();
 
@@ -80,6 +84,7 @@ public class BaseEngineTest {
 
             engine.unplugChannel(channelName);
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
+            Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
 
             channel.shutdown();
         } finally {
@@ -141,7 +146,7 @@ public class BaseEngineTest {
         } finally {
             ProcessManager.getInstance().shutdownEngine("test");
 
-            Assertions.assertThat(ProcessManager.getInstance().getEngine("test")).isNull();
+            Assertions.assertThat(ProcessManager.getEngine("test")).isNull();
         }
     }
 
@@ -154,9 +159,8 @@ public class BaseEngineTest {
     private class TestChannel extends ProcessingChannel {
 
         TestChannel(String channelName) {
-            super(channelName, "test", 5, new TestAgent());
+            super(channelName, 5, new TestAgent());
         }
-
     }
 
     private class TestAgent implements Agent {

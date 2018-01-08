@@ -11,6 +11,10 @@
 
     <artifactId>process-manager-messages-plugin</artifactId>
 
+    <properties>
+        <cron4j.version>2.2.5</cron4j.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.talanlabs</groupId>
@@ -24,6 +28,12 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>it.sauronsoftware.cron4j</groupId>
+            <artifactId>cron4j</artifactId>
+            <version>${cron4j.version}</version>
         </dependency>
 
     </dependencies>

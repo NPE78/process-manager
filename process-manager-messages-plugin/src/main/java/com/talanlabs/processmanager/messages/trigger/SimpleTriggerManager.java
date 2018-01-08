@@ -6,10 +6,10 @@ import com.talanlabs.processmanager.messages.trigger.api.TriggerEventListener;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerManager;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerManagerEventListener;
 import com.talanlabs.processmanager.messages.trigger.event.TriggerInstallEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A simple trigger manager which only contains triggers,
@@ -21,11 +21,12 @@ public class SimpleTriggerManager implements TriggerManager {
     private TriggerManagerEventListener triggerManagerEventListener;
 
     SimpleTriggerManager(TriggerManagerEventListener triggerManagerEventListener, TriggerEventListener triggerEventListener) {
-        this.triggerManagerEventListener = triggerManagerEventListener;
-        this.triggerEventListener = triggerEventListener;
         this.triggers = new HashMap<>();
+        this.triggerEventListener = triggerEventListener;
+        this.triggerManagerEventListener = triggerManagerEventListener;
     }
 
+    @Override
     public void installTrigger(Trigger trigger, boolean autoActivate) {
         synchronized (triggers) {
             triggers.put(trigger.getId(), trigger);
@@ -36,6 +37,7 @@ public class SimpleTriggerManager implements TriggerManager {
         triggerManagerEventListener.notifyEvent(new TriggerInstallEvent(this, trigger, true));
     }
 
+    @Override
     public void uninstallTrigger(String id) {
         Trigger trigger = getTrigger(id);
         if (trigger != null) {
@@ -47,6 +49,7 @@ public class SimpleTriggerManager implements TriggerManager {
         }
     }
 
+    @Override
     public void activateTrigger(String id) {
         Trigger trigger = getTrigger(id);
         if (trigger != null) {
@@ -54,6 +57,7 @@ public class SimpleTriggerManager implements TriggerManager {
         }
     }
 
+    @Override
     public void deactivateTrigger(String id) {
         Trigger trigger = getTrigger(id);
         if (trigger != null) {
@@ -61,51 +65,44 @@ public class SimpleTriggerManager implements TriggerManager {
         }
     }
 
+    @Override
     public Trigger getTrigger(String id) {
         return triggers.get(id);
     }
 
+    @Override
     public List<Trigger> getActiveTriggers() {
-        List<Trigger> lst = new ArrayList<>();
         synchronized (triggers) {
-            for (Trigger t : triggers.values()) {
-                if (t.isActive()) {
-                    lst.add(t);
-                }
-            }
+            return triggers.values().stream().filter(Trigger::isActive).collect(Collectors.toList());
         }
-        return lst;
     }
 
+    @Override
     public List<Trigger> getInactiveTriggers() {
-        List<Trigger> lst = new ArrayList<>();
         synchronized (triggers) {
-            for (Trigger t : triggers.values()) {
-                if (!t.isActive()) {
-                    lst.add(t);
-                }
-            }
+            return triggers.values().stream().filter(t -> !t.isActive()).collect(Collectors.toList());
         }
-        return lst;
     }
 
+    @Override
     public void setTriggerEventListener(TriggerEventListener triggerEventListener) {
         this.triggerEventListener = triggerEventListener;
     }
 
+    @Override
     public void notifyEvent(TriggerEvent event) {
         triggerEventListener.notifyEvent(event);
     }
 
+    @Override
     public void setTriggerManagerEventListener(TriggerManagerEventListener triggerManagerEventListener) {
         this.triggerManagerEventListener = triggerManagerEventListener;
     }
 
+    @Override
     public void shutdown() {
         synchronized (triggers) {
-            for (Trigger t : triggers.values()) {
-                t.deactivate();
-            }
+            triggers.values().forEach(Trigger::deactivate);
         }
     }
 }

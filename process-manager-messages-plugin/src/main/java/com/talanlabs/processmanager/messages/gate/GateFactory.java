@@ -1,24 +1,42 @@
 package com.talanlabs.processmanager.messages.gate;
 
+import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.messages.exceptions.GateFactoryAlreadyBindException;
 import com.talanlabs.processmanager.messages.injector.MessageInjector;
+import com.talanlabs.processmanager.shared.Engine;
+import com.talanlabs.processmanager.shared.IGateFactory;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class GateFactory {
+public class GateFactory implements IGateFactory {
+
+    public static final Engine.EnginePropertyKey<GateFactory> KEY = () -> GateFactory.class;
 
     private final LogService logService;
 
     private final List<Gate> gateList;
 
-    public GateFactory() {
+    /* package protected */ GateFactory() {
         super();
 
         logService = LogManager.getLogService(getClass());
 
-        this.gateList = new ArrayList<>();
+        gateList = new ArrayList<>();
+    }
+
+    public static GateFactory register(String engineUuid) {
+        Engine engine = ProcessManager.getEngine(engineUuid);
+        synchronized (KEY) {
+            if (engine.getProperty(KEY) != null) {
+                throw new GateFactoryAlreadyBindException(engineUuid);
+            }
+            GateFactory gateFactory = new GateFactory();
+            engine.setProperty(KEY, gateFactory);
+            return gateFactory;
+        }
     }
 
     public Gate buildGate(String id, long delay, MessageInjector messageInjector) {

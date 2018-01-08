@@ -1,4 +1,4 @@
-package com.talanlabs.processmanager.engine.exceptions;
+package com.talanlabs.processmanager.shared.exceptions;
 
 public class BaseEngineCreationException extends Exception {
 

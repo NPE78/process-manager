@@ -27,7 +27,7 @@ public class ThreadedTrigger extends AbstractTrigger {
         return "THREADED TRIGGER (task = " + task.toString() + ")";
     }
 
-    static class HostingThread extends Thread {
+    private class HostingThread extends Thread {
 
         private final LogService logService;
 
@@ -36,7 +36,7 @@ public class ThreadedTrigger extends AbstractTrigger {
         private final TriggerEventListener triggerEventListener;
         private long wait;
 
-        HostingThread(ThreadedTrigger trigger, ThreadedTriggerTask task, TriggerEventListener triggerEventListener, long wait) {
+        private HostingThread(ThreadedTrigger trigger, ThreadedTriggerTask task, TriggerEventListener triggerEventListener, long wait) {
             super("TriggerThread_" + trigger.getId());
             setDaemon(true);
 
@@ -56,7 +56,7 @@ public class ThreadedTrigger extends AbstractTrigger {
                     Thread.sleep(wait);
                 }
             } catch (InterruptedException e) {
-                logService.error(() -> "InterruptedException", e);
+                logService.error(() -> "Trigger {0} stopped! InterruptedException", e, ThreadedTrigger.this.getId());
             }
             task.clean();
         }

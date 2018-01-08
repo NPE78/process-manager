@@ -5,7 +5,7 @@ import com.talanlabs.processmanager.shared.LocalHandleReport;
 
 public class BaseLocalHandleReport extends BaseHandleReport implements LocalHandleReport {
 
-    private Runnable runnable;
+    private final Runnable runnable;
 
     public BaseLocalHandleReport(ChannelSlot slot, Runnable runnable) {
         super(slot);

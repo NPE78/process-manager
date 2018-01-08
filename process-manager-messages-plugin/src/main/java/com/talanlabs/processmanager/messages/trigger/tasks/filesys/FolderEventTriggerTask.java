@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A task which scans a folder and sends a notification to its trigger when a change occurred (modified file, new file, removed file).<br>
+ * @see com.talanlabs.processmanager.messages.gate.AbstractFileSysGate
+ */
 public class FolderEventTriggerTask extends AbstractTriggerTask {
 
     /**

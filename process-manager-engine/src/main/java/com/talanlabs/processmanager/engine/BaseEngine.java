@@ -15,17 +15,21 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
-public class BaseEngine implements Engine {
+/* package protected*/ final class BaseEngine implements Engine {
 
+    private final String uuid;
     private final Map<String, ChannelSlot> channelSlots;
     private final LogService logService;
     private final File errorPath;
+    private final Map<EnginePropertyKey, Object> properties;
     private EngineListener listener;
-    private String uuid;
+
     /**
      * Maximum number of retained messages
      */
@@ -47,6 +51,8 @@ public class BaseEngine implements Engine {
 
         this.listener = new DefaultEngineListener();
 
+        this.properties = new HashMap<>();
+
         init();
     }
 
@@ -56,8 +62,24 @@ public class BaseEngine implements Engine {
     }
 
     @Override
+    public String getUuid() {
+        return uuid;
+    }
+
+    @Override
     public void setListener(EngineListener listener) {
         this.listener = listener;
+    }
+
+    @Override
+    public <V> void setProperty(EnginePropertyKey<V> key, V value) {
+        properties.put(key, value);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <V> V getProperty(EnginePropertyKey<V> key) {
+        return (V) properties.get(key);
     }
 
     @Override
@@ -112,7 +134,7 @@ public class BaseEngine implements Engine {
     public void activateChannels() {
         synchronized (channelSlots) {
             for (ChannelSlot ch : channelSlots.values()) {
-                ch.activate();
+                ch.activate(getUuid());
             }
         }
     }
@@ -162,6 +184,13 @@ public class BaseEngine implements Engine {
     }
 
     @Override
+    public List<PluggableChannel> getPluggedChannels() {
+        synchronized (channelSlots) {
+            return channelSlots.values().stream().filter(ChannelSlot::isPlugged).map(ChannelSlot::getPluggedChannel).collect(Collectors.toList());
+        }
+    }
+
+    @Override
     public void shutdown() {
         logService.info(() -> "BaseEngine {0} is shutting down...", uuid);
         if (channelSlots != null && channelSlots.size() > 0) {
@@ -173,7 +202,7 @@ public class BaseEngine implements Engine {
                 }
             }
         }
-        logService.info(() -> "ProcessEngine {0} has been shut down. There may still be messages waiting to be processed", uuid);
+        logService.info(() -> "BaseEngine {0} has been shut down. There may still be messages waiting to be processed to completely shutdown", uuid);
     }
 
     private void storeMessages(ChannelSlot channelSlot) {
@@ -298,10 +327,10 @@ public class BaseEngine implements Engine {
         }
 
         @Override
-        public boolean activate() {
+        public boolean activate(String engineUuid) {
             boolean activated = false;
             if (channel != null) {
-                activated = channel.activate();
+                activated = channel.activate(engineUuid);
                 if (activated) {
                     flushMessages(channel);
                 }

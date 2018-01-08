@@ -6,6 +6,8 @@ import com.talanlabs.processmanager.shared.Channel;
 import com.talanlabs.processmanager.shared.ChannelSlot;
 import com.talanlabs.processmanager.shared.HandleReport;
 import com.talanlabs.processmanager.shared.PluggableChannel;
+import com.talanlabs.processmanager.shared.exceptions.ChannelStateException;
+import com.talanlabs.processmanager.shared.exceptions.NotStartedChannelException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.Serializable;
@@ -21,10 +23,10 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
     private static final int IDLING_LOG = 0;
     private static final int BUSY_LOG = 1;
     private final LogService logService;
-    private final String engineUuid;
     private final Status status;
-    private int maxWorkingAgents;
-    private Agent agent;
+    private final int maxWorkingAgents;
+    private final Agent agent;
+    private String engineUuid;
     private boolean overloaded = false;
     private boolean busy = false;
     private int lastLoggedBusy = NO_LOG;
@@ -32,16 +34,22 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
 
     private boolean available = false;
 
-    public ProcessingChannel(String name, String engineUuid, int maxWorking, Agent agent) {
+    public ProcessingChannel(String name, int maxWorking, Agent agent) {
         super(name);
 
         logService = LogManager.getLogServiceFactory().getLogService(getClass());
 
-        this.engineUuid = engineUuid;
         this.maxWorkingAgents = maxWorking;
         this.agent = agent;
 
         status = new Status(this);
+    }
+
+    private void setEngineUuid(String engineUuid) {
+        if (this.engineUuid != null && !this.engineUuid.equals(engineUuid)) {
+            throw new ChannelStateException(String.format("The channel %s has already been activated on a different engine", getName()));
+        }
+        this.engineUuid = engineUuid;
     }
 
     @Override
@@ -70,7 +78,9 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
     }
 
     @Override
-    public boolean activate() {
+    public boolean activate(String engineUuid) {
+        setEngineUuid(engineUuid);
+
         ProcessMonitor pm = new ProcessMonitor(this);
         processPool = new ProcessPool(status, pm);
         pm.start();
@@ -78,8 +88,15 @@ public class ProcessingChannel extends AbstractChannel implements PluggableChann
         return true;
     }
 
+    public Agent getAgent() {
+        return agent;
+    }
+
     @Override
     public void shutdown() {
+        if (processPool == null) {
+            throw new NotStartedChannelException(getName());
+        }
         processPool.shutdown();
     }
 

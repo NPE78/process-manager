@@ -1,6 +1,13 @@
 package com.talanlabs.processmanager.shared;
 
+import java.util.List;
+
 public interface Engine extends MessageHandler {
+
+    /**
+     * Returns the unique id of the engine
+     */
+    String getUuid();
 
     void plugChannel(PluggableChannel channel);
 
@@ -10,6 +17,15 @@ public interface Engine extends MessageHandler {
      * Sets a engine listener to be notified
      */
     void setListener(EngineListener listener);
+
+    <V> void setProperty(EnginePropertyKey<V> key, V value);
+
+    <V> V getProperty(EnginePropertyKey<V> key);
+
+    /**
+     * Returns the list of plugged channels
+     */
+    List<PluggableChannel> getPluggedChannels();
 
     /**
      * Called when the process manager engine must shut down
@@ -31,4 +47,7 @@ public interface Engine extends MessageHandler {
      */
     int getNbWorking(String channelName);
 
+    interface EnginePropertyKey<V> {
+        Class<V> getType();
+    }
 }
