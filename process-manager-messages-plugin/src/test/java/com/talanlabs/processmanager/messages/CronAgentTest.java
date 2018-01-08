@@ -2,7 +2,9 @@ package com.talanlabs.processmanager.messages;
 
 import com.talanlabs.processmanager.engine.ProcessManager;
 import com.talanlabs.processmanager.engine.ProcessingChannel;
+import com.talanlabs.processmanager.messages.exceptions.AlreadyStartedProbeException;
 import com.talanlabs.processmanager.messages.probe.CronAgent;
+import com.talanlabs.processmanager.messages.probe.ProbeAgent;
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
@@ -49,6 +51,41 @@ public class CronAgentTest {
             engine.shutdown();
         }
         Assertions.assertThat(agent.isActive()).isFalse();
+    }
+
+    @Test(expected = AlreadyStartedProbeException.class)
+    public void testCronTwice() throws BaseEngineCreationException {
+        Engine engine = ProcessManager.getInstance().createEngine("testCron", basePath);
+        CronAgent agent;
+        try {
+            agent = new CronAgent("myChannel", "BEAT", "* * * * *");
+            agent.activate(engine.getUuid());
+            agent.activate(engine.getUuid());
+
+            Assertions.assertThat(agent.isActive()).isTrue();
+            engine.handle("CronAgent_myChannel", ProbeAgent.SupportedMessages.STOP);
+            Assertions.assertThat(agent.isActive()).isFalse();
+        } finally {
+            engine.shutdown();
+        }
+    }
+
+    @Test
+    public void testCronStopHandle() throws BaseEngineCreationException, InterruptedException {
+        Engine engine = ProcessManager.getInstance().createEngine("testCron", basePath);
+        CronAgent agent;
+        try {
+            agent = new CronAgent("myChannel", "BEAT", "* * * * *");
+            agent.activate(engine.getUuid());
+
+            Assertions.assertThat(agent.isActive()).isTrue();
+            engine.handle("CronAgent_myChannel", ProbeAgent.SupportedMessages.STOP);
+
+            sleep(50);
+            Assertions.assertThat(agent.isActive()).isFalse();
+        } finally {
+            engine.shutdown();
+        }
     }
 
     // Utilities and classes

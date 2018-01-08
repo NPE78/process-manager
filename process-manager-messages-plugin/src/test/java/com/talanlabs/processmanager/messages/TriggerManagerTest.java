@@ -21,6 +21,9 @@ public class TriggerManagerTest {
                 if (event instanceof TriggerInstallEvent) {
                     checks.installEvent = true;
                     checks.isInstall = ((TriggerInstallEvent) event).isInstall();
+                    checks.toString = ((TriggerInstallEvent) event).toString();
+                    checks.triggerToString = ((TriggerInstallEvent) event).getTrigger().toString();
+
                 }
                 checks.triggerManagerEventCalled = true;
             };
@@ -54,9 +57,12 @@ public class TriggerManagerTest {
             Assertions.assertThat(checks.triggerManagerEventCalled).isTrue();
             Assertions.assertThat(checks.installEvent).isTrue();
             Assertions.assertThat(checks.isInstall).isTrue();
+            Assertions.assertThat(checks.toString).isEqualTo("Trigger 'THREADED TRIGGER (task = id)' Installed");
+            Assertions.assertThat(checks.triggerToString).isEqualTo("THREADED TRIGGER (task = id)");
 
             triggerEngine.uninstallTrigger("id");
             Assertions.assertThat(checks.isInstall).isFalse();
+            Assertions.assertThat(checks.toString).isEqualTo("Trigger 'THREADED TRIGGER (task = id)' Uninstalled");
 
             triggerEngine.installTrigger(trigger, false);
 
@@ -77,5 +83,7 @@ public class TriggerManagerTest {
         boolean triggerEventCalled;
         boolean installEvent;
         boolean isInstall;
+        public String toString;
+        public String triggerToString;
     }
 }
