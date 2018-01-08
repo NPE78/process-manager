@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * The default engine which is a singleton. See {@link ProcessManager#createEngine(String, File)} to create one
+ */
 /* package protected*/ final class BaseEngine implements Engine {
 
     private final String uuid;
@@ -203,6 +206,8 @@ import java.util.stream.Collectors;
             }
         }
         logService.info(() -> "BaseEngine {0} has been shut down. There may still be messages waiting to be processed to completely shutdown", uuid);
+
+        ProcessManager.getInstance().removeEngine(getUuid()); // to be sure the engine has been removed in the process manager also
     }
 
     private void storeMessages(ChannelSlot channelSlot) {
