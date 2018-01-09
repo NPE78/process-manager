@@ -4,6 +4,7 @@ import com.talanlabs.processmanager.engine.ProcessManager;
 import com.talanlabs.processmanager.messages.agent.AbstractFileAgent;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.messages.injector.AbstractInjector;
+import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
@@ -132,6 +133,28 @@ public class InjectorTest {
     @Test(expected = NullPointerException.class)
     public void testInvalidFlux() {
         new MyAgent<>(null);
+    }
+
+    @Test
+    public void testInvalidPath() {
+        DefaultFileSysGate gate = new DefaultFileSysGate("test", "name", new File("\\Z:\\\\INVALID"), 2000, new MyInjector<>(MyFlux.class));
+        gate.createNewFile("id", "data");
+
+        gate.accept("id");
+        gate.reinject("id");
+        gate.retry("id");
+        gate.archive("id");
+    }
+
+    @Test
+    public void testInvalidFileName() {
+        DefaultFileSysGate gate = new DefaultFileSysGate("test", "name", TestUtils.getErrorPath(), 2000, new MyInjector<>(MyFlux.class));
+        gate.createNewFile("\\\\\\INVALID", "data");
+
+        gate.accept("id");
+        gate.reinject("id");
+        gate.retry("id");
+        gate.archive("id");
     }
 
     // Utilities and classes
