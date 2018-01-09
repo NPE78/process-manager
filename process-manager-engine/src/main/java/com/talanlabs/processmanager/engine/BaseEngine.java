@@ -210,12 +210,13 @@ import java.util.stream.Collectors;
             for (String key : channelSlots.keySet()) {
                 ChannelSlot channelSlot = channelSlots.get(key);
                 storeMessages(channelSlot);
-                if (channelSlot.isPlugged()) {
+                if (channelSlot.isPlugged() && channelSlot.isAvailable()) {
                     channelSlot.getPluggedChannel().shutdown();
                 }
             }
         }
         addons.values().forEach(IEngineAddon::disconnectAddon);
+        addons.clear();
 
         logService.info(() -> "BaseEngine {0} has been shut down. There may still be messages waiting to be processed to completely shutdown", uuid);
 

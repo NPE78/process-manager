@@ -82,11 +82,11 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
     protected abstract M createFlux();
 
     public final File getWorkDir() {
-        return Optional.of(fileInjector).map(FileInjector::getWorkDir).orElseThrow(InjectorNotCreatedYetException::new);
+        return Optional.ofNullable(fileInjector).map(FileInjector::getWorkDir).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     public final String getAcceptedPath() {
-        return Optional.of(fileInjector).map(FileInjector::getAcceptedPath).orElseThrow(InjectorNotCreatedYetException::new);
+        return Optional.ofNullable(fileInjector).map(FileInjector::getAcceptedPath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     public final void acceptFlux(M flux) {

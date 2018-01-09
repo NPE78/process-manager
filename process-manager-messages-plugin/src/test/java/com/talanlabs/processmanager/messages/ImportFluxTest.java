@@ -40,7 +40,15 @@ public class ImportFluxTest {
         Assertions.assertThat(flux.getFile()).isNotNull();
 
         Assertions.assertThat(flux.getContent()).isEqualTo(content);
+        Assertions.assertThat(flux.getContent()).isEqualTo(content);
         Assertions.assertThat(flux.getFilename()).isEqualTo(filename);
+    }
+
+    @Test
+    public void testNoFileFlux() throws IOException {
+        MyFlux flux = new MyFlux();
+        flux.setFile(null);
+        Assertions.assertThat(flux.getContent()).isEmpty();
     }
 
     private class MyFlux extends AbstractImportFlux {

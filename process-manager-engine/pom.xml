@@ -17,5 +17,12 @@
             <artifactId>process-manager-shared</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.talanlabs</groupId>
+            <artifactId>process-manager-shared</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -47,6 +47,8 @@ public class TriggerManagerTest {
             Assertions.assertThat(checks.triggerEventCalled).isFalse();
             BaseTriggerEvent<String> triggerEvent = new BaseTriggerEvent<>(trigger, "attachement");
             Assertions.assertThat(triggerEvent.getTimeStamp()).isNotNull();
+            Assertions.assertThat(triggerEvent.getSource()).isEqualTo(trigger);
+            Assertions.assertThat(triggerEvent.toString()).isEqualTo("TRIGGER_EVENT (from id) attachement");
 
             triggerEventListener.notifyEvent(triggerEvent);
             Assertions.assertThat(checks.triggerEventCalled).isTrue();

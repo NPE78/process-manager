@@ -30,10 +30,10 @@ public class ProcessingChannelTest {
             Agent agent = (message, engineUuid) -> {
             };
 
-            engine.plugChannel(new MyChannel(agent));
+            MyChannel channel = new MyChannel(agent);
+            engine.plugChannel(channel);
 
-            engine.handle("myChannel", "test");
-
+            channel.shutdown();
         } finally {
             engine.shutdown();
         }
