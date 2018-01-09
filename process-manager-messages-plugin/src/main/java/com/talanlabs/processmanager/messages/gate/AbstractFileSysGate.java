@@ -123,7 +123,12 @@ public abstract class AbstractFileSysGate implements Gate {
     @Override
     public void reinject(String msgID) {
         File f = resolveRetryFile(msgID);
-        if (f.exists() && !f.renameTo(resolveEntranceFile(msgID))) {
+        if (f.exists()) {
+            boolean moved = f.renameTo(resolveEntranceFile(msgID));
+            if (!moved) {
+                logService.warn(() -> MOVE_IMPOSSIBLE_MSG, msgID, f.getAbsolutePath());
+            }
+        } else {
             logService.warn(() -> "Reinject {0} failed.", msgID);
         }
     }
@@ -131,27 +136,36 @@ public abstract class AbstractFileSysGate implements Gate {
     @Override
     public void trash(String msgID) {
         File f = resolveAcceptedFile(msgID);
-        if (f.exists() && !f.delete()) {
-            logService.warn(() -> "Trash {0} failed.", msgID);
+        if (f.exists()) {
+            boolean removed = f.delete();
+            if (!removed) {
+                logService.warn(() -> "Trash {0} failed.", msgID);
+            }
+        } else {
+            logService.warn(() -> FILE_DOESNOT_EXIST_MSG, msgID, f.getAbsolutePath());
         }
     }
 
     @Override
     public void archive(String msgID) {
         File f = resolveAcceptedFile(msgID);
-        if (f.exists() && !f.renameTo(new File(archiveFolder, msgID))) {
-            logService.warn(() -> "Archive {0} failed.", msgID);
-        }
+        moveFileToFolder(f, msgID, archiveFolder);
     }
 
     @Override
     public void accept(String msgID) {
         File f = resolveEntranceFile(msgID);
-        if (f.exists()) {
-            boolean remove = f.renameTo(new File(acceptedFolder, msgID));
+        moveFileToFolder(f, msgID, acceptedFolder);
+    }
+
+    private void moveFileToFolder(File sourceFolder, String filename, File folder) {
+        if (sourceFolder.exists()) {
+            boolean remove = sourceFolder.renameTo(new File(folder, filename));
             if (!remove) {
-                logService.warn(() -> MOVE_IMPOSSIBLE_MSG, msgID, f.getAbsolutePath());
+                logService.warn(() -> MOVE_IMPOSSIBLE_MSG, filename, sourceFolder.getAbsolutePath());
             }
+        } else {
+            logService.warn(() -> FILE_DOESNOT_EXIST_MSG, filename, sourceFolder.getAbsolutePath());
         }
     }
 
