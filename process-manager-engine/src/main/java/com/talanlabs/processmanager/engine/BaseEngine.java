@@ -316,6 +316,9 @@ import java.util.stream.Collectors;
 
         @Override
         public synchronized void unplugChannel() {
+            if (channel != null) {
+                channel.shutdown();
+            }
             this.channel = null;
             listener.notifySlotUnplug(this);
         }

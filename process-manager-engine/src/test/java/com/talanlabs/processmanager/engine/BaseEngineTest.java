@@ -8,7 +8,6 @@ import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationExceptio
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.concurrent.CountDownLatch;
 import org.assertj.core.api.Assertions;
@@ -20,7 +19,7 @@ public class BaseEngineTest {
 
     private CountDownLatch countDownLatch;
 
-    public BaseEngineTest() throws IOException {
+    public BaseEngineTest() {
         logService = LogManager.getLogService(getClass());
     }
 
@@ -76,8 +75,6 @@ public class BaseEngineTest {
             engine.unplugChannel(channelName);
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
             Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
-
-            channel.shutdown();
         } finally {
             engine.shutdown();
         }

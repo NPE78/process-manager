@@ -1,7 +1,7 @@
 package com.talanlabs.processmanager.messages.agent;
 
+import com.talanlabs.processmanager.engine.AbstractAgent;
 import com.talanlabs.processmanager.engine.ProcessManager;
-import com.talanlabs.processmanager.engine.ProcessingChannel;
 import com.talanlabs.processmanager.messages.exceptions.InjectorNotCreatedYetException;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.messages.gate.GateFactory;
@@ -9,52 +9,57 @@ import com.talanlabs.processmanager.messages.injector.AbstractInjector;
 import com.talanlabs.processmanager.messages.injector.IInjector;
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
-import com.talanlabs.processmanager.shared.PluggableChannel;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Optional;
 
+/**
+ * An agent wrapping a more simple agent: AbstractAgent
+ * @param <M> the type of flux managed by this agent
+ */
 public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements Agent {
 
     private final LogService logService;
 
+    private final SimpleAgent simpleAgent;
     private final Class<M> fluxClass;
-    private final String name;
     private FileInjector fileInjector;
 
     public AbstractFileAgent(Class<M> fluxClass) {
         super();
 
+        this.simpleAgent = new SimpleAgent(fluxClass.getSimpleName());
+
         logService = LogManager.getLogService(getClass());
 
         this.fluxClass = fluxClass;
-        this.name = fluxClass.getSimpleName();
-    }
-
-    public String getName() {
-        return name;
     }
 
     public final LogService getLogService() {
         return logService;
     }
 
+    public final String getName() {
+        return simpleAgent.getName();
+    }
+
     /**
      * Builds an injector which simply handles any file event back to this agent, using the channel
      */
     protected IInjector buildInjector(String engineUuid, File basePath) {
-        fileInjector = new FileInjector(engineUuid, name, basePath);
+        fileInjector = new FileInjector(engineUuid, getName(), basePath);
         return fileInjector;
-
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public final void work(Serializable message, String engineUuid) {
-        if (fluxClass.isAssignableFrom(message.getClass())) {
+        if (message != null && fluxClass.isAssignableFrom(message.getClass())) {
             doWork((M) message, engineUuid);
+        } else {
+            logService.warn(() -> "Agent {0} received a message it could not understand: {1}", getName(), message != null ? message.getClass() : "null");
         }
     }
 
@@ -70,13 +75,19 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
      * @param basePath   the base path where the files for this agent are located, before being redirected to accepted, rejected, retry or archive folders
      */
     public void register(String engineUuid, int maxWorking, long delay, File basePath) {
+        simpleAgent.register(engineUuid, maxWorking);
+
         Engine engine = ProcessManager.getEngine(engineUuid);
         GateFactory gateFactory = engine.getAddon(GateFactory.class)
                 .orElseGet(() -> GateFactory.register(engineUuid));
-
-        PluggableChannel pluggableChannel = new ProcessingChannel(name, maxWorking, this);
         gateFactory.buildGate(getName(), delay, buildInjector(engineUuid, basePath));
-        engine.plugChannel(pluggableChannel);
+    }
+
+    /**
+     * Unregister from the current engine and stop the channel
+     */
+    public final void unregister() {
+        simpleAgent.unregister();
     }
 
     protected abstract M createFlux();
@@ -136,8 +147,25 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
         @Override
         public M createFlux() {
             M flux = AbstractFileAgent.this.createFlux();
-            flux.setName(name);
+            flux.setName(super.getName());
             return flux;
+        }
+    }
+
+    private final class SimpleAgent extends AbstractAgent {
+
+        public SimpleAgent(String name) {
+            super(name);
+        }
+
+        @Override
+        protected Agent getAgent() {
+            return AbstractFileAgent.this;
+        }
+
+        @Override
+        public void work(Serializable message, String engineUuid) {
+            AbstractFileAgent.this.work(message, engineUuid);
         }
     }
 }
