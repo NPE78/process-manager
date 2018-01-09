@@ -1,6 +1,8 @@
 package com.talanlabs.processmanager.shared;
 
+import com.talanlabs.processmanager.shared.exceptions.AddonAlreadyBoundException;
 import java.util.List;
+import java.util.Optional;
 
 public interface Engine extends MessageHandler {
 
@@ -18,9 +20,9 @@ public interface Engine extends MessageHandler {
      */
     void setListener(EngineListener listener);
 
-    <V> void setProperty(EnginePropertyKey<V> key, V value);
+   void addAddon(IEngineAddon engineAddon) throws AddonAlreadyBoundException;
 
-    <V> V getProperty(EnginePropertyKey<V> key);
+    <V extends IEngineAddon> Optional<V> getAddon(Class<V> addonClass);
 
     /**
      * Returns the list of plugged channels
@@ -47,7 +49,11 @@ public interface Engine extends MessageHandler {
      */
     int getNbWorking(String channelName);
 
-    interface EnginePropertyKey<V> {
-        Class<V> getType();
+    interface IEngineAddon {
+
+        Class<? extends IEngineAddon> getAddonClass();
+
+        void disconnectAddon();
+
     }
 }

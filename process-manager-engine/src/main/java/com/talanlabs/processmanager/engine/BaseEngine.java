@@ -7,6 +7,7 @@ import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.EngineListener;
 import com.talanlabs.processmanager.shared.HandleReport;
 import com.talanlabs.processmanager.shared.PluggableChannel;
+import com.talanlabs.processmanager.shared.exceptions.AddonAlreadyBoundException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -30,7 +32,7 @@ import java.util.stream.Collectors;
     private final Map<String, ChannelSlot> channelSlots;
     private final LogService logService;
     private final File errorPath;
-    private final Map<EnginePropertyKey, Object> properties;
+    private final Map<Class<? extends IEngineAddon>, IEngineAddon> addons;
     private EngineListener listener;
 
     /**
@@ -54,7 +56,7 @@ import java.util.stream.Collectors;
 
         this.listener = new DefaultEngineListener();
 
-        this.properties = new HashMap<>();
+        this.addons = new HashMap<>();
 
         init();
     }
@@ -75,14 +77,20 @@ import java.util.stream.Collectors;
     }
 
     @Override
-    public <V> void setProperty(EnginePropertyKey<V> key, V value) {
-        properties.put(key, value);
+    public void addAddon(IEngineAddon engineAddon) throws AddonAlreadyBoundException {
+        synchronized (addons) {
+            IEngineAddon addon = addons.get(engineAddon.getAddonClass());
+            if (addon != null) {
+                throw new AddonAlreadyBoundException(getUuid(), addon);
+            }
+            addons.put(engineAddon.getAddonClass(), engineAddon);
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> V getProperty(EnginePropertyKey<V> key) {
-        return (V) properties.get(key);
+    public <V extends IEngineAddon> Optional<V> getAddon(Class<V> addonClass) {
+        return Optional.ofNullable((V) addons.get(addonClass));
     }
 
     @Override
@@ -205,6 +213,8 @@ import java.util.stream.Collectors;
                 }
             }
         }
+        addons.values().forEach(IEngineAddon::disconnectAddon);
+
         logService.info(() -> "BaseEngine {0} has been shut down. There may still be messages waiting to be processed to completely shutdown", uuid);
 
         ProcessManager.getInstance().removeEngine(getUuid()); // to be sure the engine has been removed in the process manager also

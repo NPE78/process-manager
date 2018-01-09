@@ -1,5 +1,6 @@
 package com.talanlabs.processmanager.messages.trigger;
 
+import com.talanlabs.processmanager.engine.EngineAddon;
 import com.talanlabs.processmanager.messages.trigger.api.Trigger;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerEvent;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerEventListener;
@@ -9,23 +10,29 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * The trigger engine is the default trigger manager with the process-manager-messages-plugin.<br>
- * It is a singleton, use {@link #getInstance()} to get it
+ * The trigger engine is the default trigger manager with the process-manager-messages-plugin.
  */
-public class TriggerEngine implements TriggerManager {
+public class TriggerEngine extends EngineAddon<TriggerEngine> implements TriggerManager {
 
     private final TriggerManager manager;
     private final TriggerEventListenerBroker triggerEventListenerBroker;
 
-    private TriggerEngine() {
+    /* package protected */ TriggerEngine(String engineUuid) {
+        super(TriggerEngine.class, engineUuid);
+
         triggerEventListenerBroker = new TriggerEventListenerBroker();
 
         this.manager = new SimpleTriggerManager(event -> {
         }, triggerEventListenerBroker);
     }
 
-    public static TriggerEngine getInstance() {
-        return TriggerEngine.SingletonHolder.instance;
+    public static TriggerEngine register(String engineUuid) {
+        return new TriggerEngine(engineUuid).registerAddon();
+    }
+
+    @Override
+    public void disconnectAddon() {
+        shutdown();
     }
 
     public void addListener(TriggerEventListener listener) {
@@ -85,20 +92,6 @@ public class TriggerEngine implements TriggerManager {
     @Override
     public void shutdown() {
         manager.shutdown();
-    }
-
-    /**
-     * Sécurité anti-désérialisation
-     */
-    private Object readResolve() {
-        return getInstance();
-    }
-
-    /**
-     * Holder
-     */
-    private static final class SingletonHolder {
-        private static final TriggerEngine instance = new TriggerEngine();
     }
 
     private static class TriggerEventListenerBroker implements TriggerEventListener {

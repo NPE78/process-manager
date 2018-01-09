@@ -9,14 +9,14 @@ import java.io.File;
  */
 public class DefaultFileSysGate extends AbstractFileSysGate {
 
-    public DefaultFileSysGate(String name, GateFolders gateFolders, long retryPeriod, MessageInjector injector) {
-        super(name, gateFolders, retryPeriod, injector);
+    public DefaultFileSysGate(String engineUuid, String name, GateFolders gateFolders, long retryPeriod, MessageInjector injector) {
+        super(engineUuid, name, gateFolders, retryPeriod, injector);
 
         init();
     }
 
-    public DefaultFileSysGate(String name, File rootDir, long retryPeriod, MessageInjector injector) {
-        this(name, new GateFolders(rootDir,
+    public DefaultFileSysGate(String engineUuid, String name, File rootDir, long retryPeriod, MessageInjector injector) {
+        this(engineUuid, name, new GateFolders(rootDir,
                 new File(rootDir + "/accepted"),
                 new File(rootDir + "/rejected"),
                 new File(rootDir + "/retry"),

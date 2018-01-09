@@ -3,7 +3,6 @@ package com.talanlabs.processmanager.messages.agent;
 import com.talanlabs.processmanager.engine.ProcessManager;
 import com.talanlabs.processmanager.engine.ProcessingChannel;
 import com.talanlabs.processmanager.messages.exceptions.InjectorNotCreatedYetException;
-import com.talanlabs.processmanager.messages.exceptions.InvalidGateStateException;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.messages.gate.GateFactory;
 import com.talanlabs.processmanager.messages.injector.AbstractInjector;
@@ -53,8 +52,7 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
 
     /**
      * Register this agent as a agent which is triggered to manage files.<br>
-     * Creates an injector, creates a channel, and registers to the gate factory<br>
-     * If no gate factory is yet registered on the engine, throws a {@link InvalidGateStateException}
+     * Creates an injector, creates a channel, and registers to the gate factory addon (creates one if none is bound)
      *
      * @param engineUuid the unique id of the engine
      * @param maxWorking the maximum number of working agents
@@ -62,15 +60,12 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
      * @param basePath   the base path where the files for this agent are located, before being redirected to accepted, rejected, retry or archive folders
      */
     public void register(String engineUuid, int maxWorking, long delay, File basePath) {
-        PluggableChannel pluggableChannel = new ProcessingChannel(name, maxWorking, this);
         Engine engine = ProcessManager.getEngine(engineUuid);
-        synchronized (GateFactory.KEY) {
-            GateFactory gateFactory = engine.getProperty(GateFactory.KEY);
-            if (gateFactory == null) {
-                throw new InvalidGateStateException("The gate factory hasn't been installed yet on the engine " + engineUuid);
-            }
-            gateFactory.buildGate(getName(), delay, buildInjector(engineUuid, basePath));
-        }
+        GateFactory gateFactory = engine.getAddon(GateFactory.class)
+                .orElseGet(() -> GateFactory.register(engineUuid));
+
+        PluggableChannel pluggableChannel = new ProcessingChannel(name, maxWorking, this);
+        gateFactory.buildGate(getName(), delay, buildInjector(engineUuid, basePath));
         engine.plugChannel(pluggableChannel);
     }
 
