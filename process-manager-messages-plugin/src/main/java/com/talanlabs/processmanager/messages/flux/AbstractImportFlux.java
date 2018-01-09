@@ -3,9 +3,9 @@ package com.talanlabs.processmanager.messages.flux;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.stream.Collectors;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public abstract class AbstractImportFlux extends AbstractFlux implements IImportFlux {
@@ -41,13 +41,16 @@ public abstract class AbstractImportFlux extends AbstractFlux implements IImport
     private String readFile(File file) throws IOException {
         String result = null;
         if (file != null) {
-            try (FileInputStream stream = new FileInputStream(file)) {
-                FileChannel fc = stream.getChannel();
-                MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-                /* Instead of using default, pass in a decoder. */
-                result = UTF8_CHARSET.decode(bb).toString();
-            }
+            result = getFileContent(file);
         }
         return StringUtils.trimToEmpty(result);
+    }
+
+    private String getFileContent(File file) throws IOException {
+        String result;
+        try (FileInputStream fis = new FileInputStream(file)) {
+            result = IOUtils.readLines(fis, UTF8_CHARSET).stream().collect(Collectors.joining("\n"));
+        }
+        return result;
     }
 }

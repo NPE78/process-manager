@@ -10,11 +10,15 @@ import com.talanlabs.processmanager.messages.injector.IInjector;
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.PluggableChannel;
+import com.talanlabs.processmanager.shared.logging.LogManager;
+import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Optional;
 
 public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements Agent {
+
+    private final LogService logService;
 
     private final Class<M> fluxClass;
     private final String name;
@@ -23,12 +27,18 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
     public AbstractFileAgent(Class<M> fluxClass) {
         super();
 
+        logService = LogManager.getLogService(getClass());
+
         this.fluxClass = fluxClass;
         this.name = fluxClass.getSimpleName();
     }
 
     public String getName() {
         return name;
+    }
+
+    public final LogService getLogService() {
+        return logService;
     }
 
     /**
@@ -71,8 +81,26 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
 
     protected abstract M createFlux();
 
+    public final File getWorkDir() {
+        return Optional.of(fileInjector).map(FileInjector::getWorkDir).orElseThrow(InjectorNotCreatedYetException::new);
+    }
+
     public final String getAcceptedPath() {
         return Optional.of(fileInjector).map(FileInjector::getAcceptedPath).orElseThrow(InjectorNotCreatedYetException::new);
+    }
+
+    public final void acceptFlux(M flux) {
+        boolean moved = flux.getFile().renameTo(new File(getAcceptedPath(), flux.getFilename()));
+        if (!moved) {
+            logService.warn(() -> "Flux {0} was not moved to the accepted path!", flux.getFilename());
+        }
+    }
+
+    public final void rejectFlux(M flux) {
+        boolean moved = flux.getFile().renameTo(new File(getRejectedPath(), flux.getFilename()));
+        if (!moved) {
+            logService.warn(() -> "Flux {0} was not moved to the rejected path!", flux.getFilename());
+        }
     }
 
     public final String getRejectedPath() {

@@ -80,7 +80,9 @@ import java.util.stream.Collectors;
     public void addAddon(IEngineAddon engineAddon) throws AddonAlreadyBoundException {
         synchronized (addons) {
             IEngineAddon addon = addons.get(engineAddon.getAddonClass());
-            if (addon != null) {
+            if (addon == engineAddon) {
+                logService.debug(() -> "Adding the same addon {0} twice to {1} is useless", addon.getAddonClass().getSimpleName(), getUuid());
+            } else if (addon != null) {
                 throw new AddonAlreadyBoundException(getUuid(), addon);
             }
             addons.put(engineAddon.getAddonClass(), engineAddon);

@@ -41,6 +41,13 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.talanlabs</groupId>
+            <artifactId>process-manager-shared</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>info.cukes</groupId>

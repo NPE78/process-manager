@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import org.apache.commons.io.IOUtils;
 
 public abstract class AbstractExportFlux extends AbstractFlux implements IExportFlux {
 
@@ -17,10 +18,9 @@ public abstract class AbstractExportFlux extends AbstractFlux implements IExport
         return file;
     }
 
-
     public final void write(File file, String content) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(file)) {
-            fos.write(content.getBytes(CHARSET_UTF8));
+            IOUtils.write(content, fos, CHARSET_UTF8);
         }
         setFilename(file.getName());
         getSendInformation().setMessageContent(content);

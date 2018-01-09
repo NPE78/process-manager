@@ -35,7 +35,7 @@ public interface Engine extends MessageHandler {
     void shutdown();
 
     /**
-     * Activate all channel slots
+     * Activate all current channel slots. If a channel is plugged later, it has to be activated manually
      */
     void activateChannels();
 
