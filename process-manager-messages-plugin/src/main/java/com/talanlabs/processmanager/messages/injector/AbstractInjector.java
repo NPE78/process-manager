@@ -43,7 +43,7 @@ public abstract class AbstractInjector<M extends AbstractImportFlux> extends Abs
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return name;
     }
 

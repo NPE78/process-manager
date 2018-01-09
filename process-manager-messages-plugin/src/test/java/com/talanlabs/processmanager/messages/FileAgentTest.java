@@ -59,6 +59,10 @@ public class FileAgentTest {
 
             Assertions.assertThat(testFlux).doesNotExist();
             Assertions.assertThat(new File(myAgent.getAcceptedPath(), "testFile")).exists();
+
+            Assertions.assertThat(engine.getPluggedChannels()).hasSize(1);
+            myAgent.unregister();
+            Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
         } finally {
             engine.shutdown();
         }
