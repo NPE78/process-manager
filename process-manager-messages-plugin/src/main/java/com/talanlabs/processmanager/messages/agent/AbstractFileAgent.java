@@ -165,7 +165,7 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
 
         @Override
         public void work(Serializable message, String engineUuid) {
-            AbstractFileAgent.this.work(message, engineUuid);
+            // this method cannot be called, the simple agent is not linked to a channel
         }
     }
 }

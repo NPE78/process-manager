@@ -45,6 +45,12 @@ public class ExportFluxTest {
         Assertions.assertThat(flux.getSendInformation().getMessageContent()).isEqualTo(content);
     }
 
+    @Test(expected = IOException.class)
+    public void testFailed() throws IOException {
+        MyFlux flux = new MyFlux();
+        flux.write(new File(""), "test");
+    }
+
     private class MyFlux extends AbstractExportFlux {
 
     }
