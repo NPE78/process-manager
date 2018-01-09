@@ -37,6 +37,7 @@
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.0.0-M1</maven-javadoc-plugin.version>
+        <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
 
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <sonar.jacoco.itReportPath>${project.build.directory}/coverage-reports/jacoco-it.exec</sonar.jacoco.itReportPath>
@@ -139,6 +140,11 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -193,6 +199,7 @@
         <module>process-manager-shared</module>
         <module>process-manager-messages-plugin</module>
         <module>process-manager-guice-plugin</module>
+        <module>process-manager-example</module>
     </modules>
 
 </project>

@@ -2,6 +2,7 @@ package com.talanlabs.processmanager.engine;
 
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
+import com.talanlabs.processmanager.shared.exceptions.AddonAlreadyBoundException;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
@@ -15,8 +16,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public class BaseEngineTest {
-
-    public static final Engine.EnginePropertyKey<String> KEY = () -> String.class;
 
     private final LogService logService;
     private final File errorPath;
@@ -153,21 +152,51 @@ public class BaseEngineTest {
     }
 
     @Test
-    public void testProperties() throws BaseEngineCreationException {
+    public void testProperties() throws BaseEngineCreationException, AddonAlreadyBoundException {
         Engine engine = ProcessManager.getInstance().createEngine("test", errorPath);
         try {
-            Assertions.assertThat(engine.getProperty(KEY)).isNotEqualTo("test property");
-            engine.setProperty(KEY, "test property");
-            Assertions.assertThat(engine.getProperty(KEY)).isEqualTo("test property");
+            MyEngineAddon myEngineAddon = createAddon(engine);
+            Assertions.assertThat(engine.getAddon(myEngineAddon.getAddonClass()).isPresent()).isTrue();
+            Assertions.assertThat(engine.getAddon(myEngineAddon.getAddonClass()).get()).isEqualTo(myEngineAddon);
         } finally {
             engine.shutdown();
         }
+    }
+
+    @Test(expected = AddonAlreadyBoundException.class)
+    public void testPropertiesAlreadyBind() throws BaseEngineCreationException, AddonAlreadyBoundException {
+        Engine engine = ProcessManager.getInstance().createEngine("test", errorPath);
+        try {
+            MyEngineAddon myEngineAddon = createAddon(engine);
+            engine.addAddon(myEngineAddon);
+        } finally {
+            engine.shutdown();
+        }
+    }
+
+    private MyEngineAddon createAddon(Engine engine) throws AddonAlreadyBoundException {
+        MyEngineAddon myEngineAddon = new MyEngineAddon(engine.getUuid());
+        Assertions.assertThat(engine.getAddon(myEngineAddon.getAddonClass()).isPresent()).isFalse();
+        engine.addAddon(myEngineAddon);
+        return myEngineAddon;
     }
 
     // Utilities and classes
 
     private void sleep(int ms) throws InterruptedException {
         new CountDownLatch(1).await(ms, TimeUnit.MILLISECONDS);
+    }
+
+    private class MyEngineAddon extends EngineAddon<MyEngineAddon> {
+
+        MyEngineAddon(String engineUuid) {
+            super(MyEngineAddon.class, engineUuid);
+        }
+
+        @Override
+        public void disconnectAddon() {
+
+        }
     }
 
     private class TestChannel extends ProcessingChannel {

@@ -1,7 +1,5 @@
-package com.talanlabs.processmanager.messages;
+package com.talanlabs.processmanager.messages.trigger;
 
-import com.talanlabs.processmanager.messages.trigger.ThreadedTrigger;
-import com.talanlabs.processmanager.messages.trigger.TriggerEngine;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerEventListener;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerManagerEventListener;
 import com.talanlabs.processmanager.messages.trigger.event.BaseTriggerEvent;
@@ -14,7 +12,7 @@ public class TriggerManagerTest {
 
     @Test
     public void testTriggerManager() {
-        TriggerEngine triggerEngine = TriggerEngine.getInstance();
+        TriggerEngine triggerEngine = new TriggerEngine("test");
         try {
             Checks checks = new Checks();
             TriggerManagerEventListener triggerManagerEventListener = event -> {

@@ -1,5 +1,6 @@
 package com.talanlabs.processmanager.messages.gate;
 
+import com.talanlabs.processmanager.engine.ProcessManager;
 import com.talanlabs.processmanager.messages.exceptions.InvalidGateStateException;
 import com.talanlabs.processmanager.messages.injector.MessageInjector;
 import com.talanlabs.processmanager.messages.trigger.ThreadedTrigger;
@@ -25,22 +26,24 @@ public abstract class AbstractFileSysGate implements Gate {
 
     private final LogService logService;
 
-    private final long retryPeriod;
+    private final String engineUuid;
     private final String name;
     private final File entranceFolder;
     private final File acceptedFolder;
     private final File rejectedFolder;
     private final File retryFolder;
     private final File archiveFolder;
+    private final long retryPeriod;
     private final MessageInjector messageInjector;
 
     private boolean opened;
     private RetryThread retryThread;
 
-    AbstractFileSysGate(String name, GateFolders gateFolders, long retryPeriod, MessageInjector injector) {
+    AbstractFileSysGate(String engineUuid, String name, GateFolders gateFolders, long retryPeriod, MessageInjector injector) {
 
         logService = LogManager.getLogService(getClass());
 
+        this.engineUuid = engineUuid;
         this.name = name;
         this.entranceFolder = gateFolders.getEntranceFolder();
         this.acceptedFolder = gateFolders.getAcceptedFolder();
@@ -185,7 +188,8 @@ public abstract class AbstractFileSysGate implements Gate {
 
     @Override
     public void close() {
-        TriggerEngine.getInstance().uninstallTrigger(name);
+        ProcessManager.getEngine(engineUuid).getAddon(TriggerEngine.class)
+                .ifPresent(te -> te.uninstallTrigger(name));
         opened = false;
     }
 
@@ -203,15 +207,16 @@ public abstract class AbstractFileSysGate implements Gate {
             throw new InvalidGateStateException("Retry thread is still active");
         }
         // install and start trigger
-        TriggerEngine te = TriggerEngine.getInstance();
+        TriggerEngine triggerEngine = ProcessManager.getEngine(engineUuid).getAddon(TriggerEngine.class)
+                .orElseGet(() -> TriggerEngine.register(engineUuid));
 
         TriggerEventListener tel = evt -> messageInjector.inject((FileTriggerEvent) evt);
 
         logService.debug(() -> "ADD LISTENER TO TRIGGER ENGINE ON: " + entranceFolder.getAbsolutePath());
-        te.addListener(tel);
+        triggerEngine.addListener(tel);
 
         Trigger t = new ThreadedTrigger(name, new FolderEventTriggerTask(entranceFolder, ".lck"), 200);
-        te.installTrigger(t, true);
+        triggerEngine.installTrigger(t, true);
 
         opened = true;
 

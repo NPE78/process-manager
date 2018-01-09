@@ -1,8 +1,10 @@
 package com.talanlabs.processmanager.messages.gate;
 
+import com.talanlabs.processmanager.engine.ProcessManager;
 import com.talanlabs.processmanager.messages.agent.AbstractFileAgent;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.messages.injector.AbstractInjector;
+import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
@@ -11,6 +13,8 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public class InjectorTest {
@@ -27,9 +31,19 @@ public class InjectorTest {
         basePath.deleteOnExit();
     }
 
+    @Before
+    public void before() throws BaseEngineCreationException {
+        ProcessManager.getInstance().createEngine("test", basePath);
+    }
+
+    @After
+    public void after() {
+        ProcessManager.getInstance().shutdownEngine("test");
+    }
+
     @Test
     public void testInjector() throws IOException, InterruptedException {
-        GateFactory gateFactory = new GateFactory();
+        GateFactory gateFactory = new GateFactory("test");
         try {
             MyInjector<MyFlux> myInjector = new MyInjector<>(MyFlux.class);
             gateFactory.buildGate("injectorTest", 500, myInjector);
@@ -58,7 +72,7 @@ public class InjectorTest {
 
     @Test
     public void testFolders() throws IOException {
-        GateFactory gateFactory = new GateFactory();
+        GateFactory gateFactory = new GateFactory("test");
         MyInjector<MyFlux> myInjector = new MyInjector<>(MyFlux.class);
         gateFactory.buildGate("injectorTest", 500, myInjector);
         gateFactory.closeGates();
@@ -96,7 +110,7 @@ public class InjectorTest {
 
     @Test
     public void testRetry() throws IOException, InterruptedException {
-        GateFactory gateFactory = new GateFactory();
+        GateFactory gateFactory = new GateFactory("test");
         try {
             MyInjector<MyFlux> myInjector = new MyInjector<>(MyFlux.class);
             gateFactory.buildGate("injectorTest", 500, myInjector);
