@@ -167,8 +167,8 @@ public class BaseEngineTest {
     public void testPropertiesAlreadyBind() throws BaseEngineCreationException, AddonAlreadyBoundException {
         Engine engine = ProcessManager.getInstance().createEngine("test", errorPath);
         try {
-            MyEngineAddon myEngineAddon = createAddon(engine);
-            engine.addAddon(myEngineAddon);
+            createAddon(engine);
+            engine.addAddon(new MyEngineAddon("test"));
         } finally {
             engine.shutdown();
         }
