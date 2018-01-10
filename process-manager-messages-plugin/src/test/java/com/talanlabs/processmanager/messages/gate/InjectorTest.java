@@ -10,9 +10,6 @@ import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
@@ -20,21 +17,9 @@ import org.junit.Test;
 
 public class InjectorTest {
 
-    private final File basePath;
-
-    public InjectorTest() throws IOException {
-        File tempFile = File.createTempFile("baseEngineTest", "tmp");
-        File tmpFolder = tempFile.getParentFile();
-        basePath = new File(tmpFolder, UUID.randomUUID().toString());
-        basePath.mkdir();
-
-        tempFile.deleteOnExit();
-        basePath.deleteOnExit();
-    }
-
     @Before
     public void before() throws BaseEngineCreationException {
-        ProcessManager.getInstance().createEngine("test", basePath);
+        ProcessManager.getInstance().createEngine("test", TestUtils.getErrorPath());
     }
 
     @After
@@ -49,19 +34,19 @@ public class InjectorTest {
             MyInjector<MyFlux> myInjector = new MyInjector<>(MyFlux.class);
             gateFactory.buildGate("injectorTest", 500, myInjector);
 
-            File file = new File(myInjector.getWorkDir(), "testFile");
+            File file = new File(myInjector.getWorkDir(), "testFileToInject");
             Assertions.assertThat(file.createNewFile()).isTrue();
-            File expectedFile = new File(myInjector.getAcceptedPath(), "testFile");
+            File expectedFile = new File(myInjector.getAcceptedPath(), "testFileToInject");
             Assertions.assertThat(expectedFile).doesNotExist();
 
-            sleep(1200);
+            TestUtils.sleep(1200);
 
             Assertions.assertThat(file).doesNotExist();
             Assertions.assertThat(expectedFile).exists();
 
             File expectedNewFile = new File(myInjector.getWorkDir(), "accepted/newFile");
             myInjector.getGate().createNewFile("newFile", "my awesome content");
-            sleep(600);
+            TestUtils.sleep(600);
             Assertions.assertThat(expectedNewFile).exists();
 
             myInjector.getGate().trash("newFile");
@@ -122,7 +107,7 @@ public class InjectorTest {
             File file = new File(myInjector.getWorkDir(), "retry/testFile");
             Assertions.assertThat(file.createNewFile()).isTrue();
 
-            sleep(1200);
+            TestUtils.sleep(1200);
             Assertions.assertThat(file).doesNotExist();
             Assertions.assertThat(expectedFile).exists();
         } finally {
@@ -158,10 +143,6 @@ public class InjectorTest {
     }
 
     // Utilities and classes
-
-    private void sleep(int ms) throws InterruptedException {
-        new CountDownLatch(1).await(ms, TimeUnit.MILLISECONDS);
-    }
 
     private static class MyFlux extends AbstractImportFlux {
         public MyFlux() {
@@ -212,7 +193,7 @@ public class InjectorTest {
         private final Class<E> fluxClass;
 
         private MyInjector(Class<E> fluxClass) {
-            super(fluxClass.getSimpleName(), basePath.getAbsolutePath());
+            super(fluxClass.getSimpleName(), TestUtils.getErrorPath().getAbsolutePath());
 
             logService = LogManager.getLogService(getClass());
 

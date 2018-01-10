@@ -2,30 +2,16 @@ package com.talanlabs.processmanager.engine;
 
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
+import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.exceptions.NotStartedChannelException;
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
 import org.junit.Test;
 
 public class ProcessingChannelTest {
 
-    private final File basePath;
-
-    public ProcessingChannelTest() throws IOException {
-        File tempFile = File.createTempFile("processingChannelTest", "tmp");
-        File tmpFolder = tempFile.getParentFile();
-        basePath = new File(tmpFolder, UUID.randomUUID().toString());
-        basePath.mkdir();
-
-        tempFile.deleteOnExit();
-        basePath.deleteOnExit();
-    }
-
     @Test(expected = NotStartedChannelException.class)
     public void testHeartbeat() throws BaseEngineCreationException {
-        Engine engine = ProcessManager.getInstance().createEngine("testHeartbeat", basePath);
+        Engine engine = ProcessManager.getInstance().createEngine("testHeartbeat", TestUtils.getErrorPath());
         try {
             Agent agent = (message, engineUuid) -> {
             };
