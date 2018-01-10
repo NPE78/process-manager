@@ -6,6 +6,7 @@ import com.talanlabs.processmanager.messages.exceptions.InjectorNotCreatedYetExc
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.messages.gate.GateFactory;
 import com.talanlabs.processmanager.shared.Engine;
+import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +64,7 @@ public class FileAgentTest {
             Assertions.assertThat(engine.getPluggedChannels()).hasSize(1);
             myAgent.unregister();
             Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
+
         } finally {
             engine.shutdown();
         }
@@ -86,6 +88,8 @@ public class FileAgentTest {
 
             Assertions.assertThat(testFlux).doesNotExist();
             Assertions.assertThat(new File(myAgent.getRejectedPath(), "rejectedFile")).exists();
+
+            myAgent.work("Invalid msg", null); // does nothing
         } finally {
             engine.shutdown();
         }
@@ -102,6 +106,29 @@ public class FileAgentTest {
         } finally {
             engine.shutdown();
         }
+    }
+
+    @Test
+    public void invalidPathAgent() {
+        MyAgent agent = new MyAgent() {
+            @Override
+            public void init() {
+                buildInjector("test", TestUtils.getErrorPath());
+            }
+        };
+        agent.init();
+
+        MyFlux flux = new MyFlux();
+        File file = new File(TestUtils.getErrorPath(), "testFile");
+        flux.setFile(file);
+
+        Assertions.assertThat(file).doesNotExist();
+        agent.acceptFlux(flux);
+        Assertions.assertThat(file).doesNotExist();
+
+        Assertions.assertThat(file).doesNotExist();
+        agent.rejectFlux(flux);
+        Assertions.assertThat(file).doesNotExist();
     }
 
     // Utilities and classes
@@ -127,6 +154,9 @@ public class FileAgentTest {
             } else {
                 acceptFlux(flux);
             }
+        }
+
+        public void init() {
         }
 
         @Override
