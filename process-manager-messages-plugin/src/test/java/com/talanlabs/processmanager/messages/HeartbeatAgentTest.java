@@ -5,12 +5,11 @@ import com.talanlabs.processmanager.engine.ProcessingChannel;
 import com.talanlabs.processmanager.messages.probe.HeartbeatAgent;
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
+import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -45,15 +44,15 @@ public class HeartbeatAgentTest {
 
             agent.activate(engine.getUuid());
 
-            sleep(10);
+            TestUtils.sleep(10);
             int tmpCount = count.count;
             Assertions.assertThat(tmpCount).isBetween(0, 1);
 
-            sleep(10);
+            TestUtils.sleep(10);
             int tmpCount2 = count.count;
             Assertions.assertThat(tmpCount2).isBetween(1, 2);
 
-            sleep(30);
+            TestUtils.sleep(30);
             int tmpCount3 = count.count;
             Assertions.assertThat(tmpCount3).isBetween(4, 5);
         } finally {
@@ -62,10 +61,6 @@ public class HeartbeatAgentTest {
     }
 
     // Utilities and classes
-
-    private void sleep(int ms) throws InterruptedException {
-        new CountDownLatch(1).await(ms, TimeUnit.MILLISECONDS);
-    }
 
     private class MyHeartbeatChannel extends ProcessingChannel {
 

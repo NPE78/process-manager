@@ -2,19 +2,18 @@ package com.talanlabs.processmanager.messages;
 
 import com.talanlabs.processmanager.engine.ProcessManager;
 import com.talanlabs.processmanager.engine.ProcessingChannel;
-import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.messages.agent.RetryAgent;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
+import com.talanlabs.processmanager.shared.TestUtils;
+import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -52,7 +51,7 @@ public class RetryAgentTest {
             Assertions.assertThat(flux.getRetryNumber()).isEqualTo(0);
             engine.handle("channel", flux);
 
-            sleep(1000);
+            TestUtils.sleep(1000);
 
             Assertions.assertThat(flux.getRetryNumber()).isGreaterThanOrEqualTo(6);
         } finally {
@@ -61,10 +60,6 @@ public class RetryAgentTest {
     }
 
     // Utilities and classes
-
-    private void sleep(int ms) throws InterruptedException {
-        new CountDownLatch(1).await(ms, TimeUnit.MILLISECONDS);
-    }
 
     private class MyChannel extends ProcessingChannel {
 

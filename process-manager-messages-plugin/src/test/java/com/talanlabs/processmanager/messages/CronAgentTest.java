@@ -7,12 +7,11 @@ import com.talanlabs.processmanager.messages.probe.CronAgent;
 import com.talanlabs.processmanager.messages.probe.ProbeAgent;
 import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
+import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -45,7 +44,7 @@ public class CronAgentTest {
             agent.activate(engine.getUuid());
             Assertions.assertThat(agent.isActive()).isTrue();
 
-            sleep(10);
+            TestUtils.sleep(10);
 
         } finally {
             engine.shutdown();
@@ -81,7 +80,7 @@ public class CronAgentTest {
             Assertions.assertThat(agent.isActive()).isTrue();
             engine.handle("CronAgent_myChannel", ProbeAgent.SupportedMessages.STOP);
 
-            sleep(50);
+            TestUtils.sleep(50);
             Assertions.assertThat(agent.isActive()).isFalse();
         } finally {
             engine.shutdown();
@@ -89,10 +88,6 @@ public class CronAgentTest {
     }
 
     // Utilities and classes
-
-    private void sleep(int ms) throws InterruptedException {
-        new CountDownLatch(1).await(ms, TimeUnit.MILLISECONDS);
-    }
 
     private class MyCronChannel extends ProcessingChannel {
 

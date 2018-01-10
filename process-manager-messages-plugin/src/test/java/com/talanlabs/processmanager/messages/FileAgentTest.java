@@ -10,38 +10,23 @@ import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public class FileAgentTest {
 
-    private final File basePath;
-
-    public FileAgentTest() throws IOException {
-        File tempFile = File.createTempFile("fileAgentTest", "tmp");
-        File tmpFolder = tempFile.getParentFile();
-        basePath = new File(tmpFolder, UUID.randomUUID().toString());
-        basePath.mkdir();
-
-        tempFile.deleteOnExit();
-        basePath.deleteOnExit();
-    }
-
     @Test
     public void testFileAgent() throws BaseEngineCreationException, InterruptedException, IOException {
-        Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", basePath);
+        Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
-            MyAgent myAgent = new MyAgent();
+            MyOtherAgent myAgent = new MyOtherAgent();
             myAgent.getLogService().info(() -> "Testing myAgent");
 
             GateFactory.register("testFileAgent");
 
-            File expectedFile = new File(basePath, "MyFlux");
+            File expectedFile = new File(TestUtils.getErrorPath(), "MyOtherFluxName");
             Assertions.assertThat(expectedFile).doesNotExist();
-            myAgent.register("testFileAgent", 5, 200, basePath);
+            myAgent.register("testFileAgent", 5, 200, TestUtils.getErrorPath());
             Assertions.assertThat(expectedFile).exists();
 
             Assertions.assertThat(myAgent.getWorkDir()).exists();
@@ -56,7 +41,7 @@ public class FileAgentTest {
             Assertions.assertThat(testFlux).exists();
 
             engine.activateChannels();
-            sleep(300);
+            TestUtils.sleep(300);
 
             Assertions.assertThat(testFlux).doesNotExist();
             Assertions.assertThat(new File(myAgent.getAcceptedPath(), "testFile")).exists();
@@ -72,11 +57,11 @@ public class FileAgentTest {
 
     @Test
     public void testFileAgentReject() throws BaseEngineCreationException, IOException, InterruptedException {
-        Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", basePath);
+        Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
             MyAgent myAgent = new MyAgent();
 
-            myAgent.register("testFileAgent", 5, 200, basePath);
+            myAgent.register("testFileAgent", 5, 200, TestUtils.getErrorPath());
 
             File testFlux = new File(myAgent.getWorkDir(), "rejectedFile");
             boolean created = testFlux.createNewFile();
@@ -84,7 +69,7 @@ public class FileAgentTest {
             Assertions.assertThat(testFlux).exists();
 
             engine.activateChannels();
-            sleep(300);
+            TestUtils.sleep(300);
 
             Assertions.assertThat(testFlux).doesNotExist();
             Assertions.assertThat(new File(myAgent.getRejectedPath(), "rejectedFile")).exists();
@@ -97,7 +82,7 @@ public class FileAgentTest {
 
     @Test(expected = InjectorNotCreatedYetException.class)
     public void testAgentNotRegistered() throws BaseEngineCreationException {
-        Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", basePath);
+        Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
             MyAgent myAgent = new MyAgent();
             myAgent.getLogService().info(() -> "Testing myAgent");
@@ -118,7 +103,7 @@ public class FileAgentTest {
         };
         agent.init();
 
-        MyFlux flux = new MyFlux();
+        MyFluxName flux = new MyFluxName();
         File file = new File(TestUtils.getErrorPath(), "testFile");
         flux.setFile(file);
 
@@ -133,35 +118,51 @@ public class FileAgentTest {
 
     // Utilities and classes
 
-    private void sleep(int ms) throws InterruptedException {
-        new CountDownLatch(1).await(ms, TimeUnit.MILLISECONDS);
-    }
-
-    private class MyFlux extends AbstractImportFlux {
+    private class MyFluxName extends AbstractImportFlux {
 
     }
 
-    private class MyAgent extends AbstractFileAgent<MyFlux> {
+    private class MyOtherFluxName extends AbstractImportFlux {
+
+    }
+
+    private class MyAgent extends AbstractFileAgent<MyFluxName> {
 
         MyAgent() {
-            super(MyFlux.class);
+            super(MyFluxName.class);
         }
 
         @Override
-        public void doWork(MyFlux flux, String engineUuid) {
-            if ("rejectedFile".equals(flux.getFilename())) {
-                rejectFlux(flux);
-            } else {
-                acceptFlux(flux);
-            }
+        public void doWork(MyFluxName flux, String engineUuid) {
+            rejectFlux(flux);
         }
 
         public void init() {
         }
 
         @Override
-        protected MyFlux createFlux() {
-            return new MyFlux();
+        protected MyFluxName createFlux() {
+            return new MyFluxName();
+        }
+    }
+
+    private class MyOtherAgent extends AbstractFileAgent<MyOtherFluxName> {
+
+        MyOtherAgent() {
+            super(MyOtherFluxName.class);
+        }
+
+        @Override
+        public void doWork(MyOtherFluxName flux, String engineUuid) {
+            acceptFlux(flux);
+        }
+
+        public void init() {
+        }
+
+        @Override
+        protected MyOtherFluxName createFlux() {
+            return new MyOtherFluxName();
         }
     }
 }
