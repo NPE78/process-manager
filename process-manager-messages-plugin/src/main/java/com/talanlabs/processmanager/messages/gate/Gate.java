@@ -9,9 +9,13 @@
  */
 package com.talanlabs.processmanager.messages.gate;
 
+import java.io.File;
+
 public interface Gate {
 
     String getName();
+
+    File getEntranceFolder();
 
     void createNewFile(String msgID, String data);
 

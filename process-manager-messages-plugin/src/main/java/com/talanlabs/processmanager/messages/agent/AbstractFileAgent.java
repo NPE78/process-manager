@@ -17,6 +17,7 @@ import java.util.Optional;
 
 /**
  * An agent wrapping a more simple agent: AbstractAgent
+ *
  * @param <M> the type of flux managed by this agent
  */
 public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements Agent {
@@ -25,7 +26,7 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
 
     private final SimpleAgent simpleAgent;
     private final Class<M> fluxClass;
-    private FileInjector fileInjector;
+    private IInjector fileInjector;
 
     public AbstractFileAgent(Class<M> fluxClass) {
         super();
@@ -41,7 +42,12 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
         return logService;
     }
 
-    public final String getName() {
+    /**
+     * The name can be overridden to permit the use of underlying agents
+     *
+     * @return the name of the scanned folder
+     */
+    public String getName() {
         return simpleAgent.getName();
     }
 
@@ -49,18 +55,23 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
      * Builds an injector which simply handles any file event back to this agent, using the channel
      */
     protected IInjector buildInjector(String engineUuid, File basePath) {
-        fileInjector = new FileInjector(engineUuid, getName(), basePath);
+        fileInjector = new FileInjector(engineUuid, getName(), basePath); // done twice with #register, in case buildInjector is called separately
+        // we could check a file injector wasn't set yet
         return fileInjector;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public final void work(Serializable message, String engineUuid) {
-        if (message != null && fluxClass.isAssignableFrom(message.getClass())) {
+        if (isConcerned(message)) {
             doWork((M) message, engineUuid);
         } else {
             logService.warn(() -> "Agent {0} received a message it could not understand: {1}", getName(), message != null ? message.getClass() : "null");
         }
+    }
+
+    private boolean isConcerned(Serializable message) {
+        return message != null && fluxClass.isAssignableFrom(message.getClass());
     }
 
     public abstract void doWork(M flux, String engineUuid);
@@ -80,7 +91,8 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
         Engine engine = ProcessManager.getEngine(engineUuid);
         GateFactory gateFactory = engine.getAddon(GateFactory.class)
                 .orElseGet(() -> GateFactory.register(engineUuid));
-        gateFactory.buildGate(getName(), delay, buildInjector(engineUuid, basePath));
+        fileInjector = buildInjector(engineUuid, basePath);
+        gateFactory.buildGate(getName(), delay, fileInjector);
     }
 
     /**
@@ -92,12 +104,35 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
 
     protected abstract M createFlux();
 
+    /**
+     * This method is called by the injector. It must not be called by an agent thread
+     */
+    protected void handleFlux(M flux, String engineUuid) {
+        ProcessManager.getEngine(engineUuid).handle(getName(), flux);
+    }
+
+    protected Agent getAgent() {
+        return this;
+    }
+
     public final File getWorkDir() {
-        return Optional.ofNullable(fileInjector).map(FileInjector::getWorkDir).orElseThrow(InjectorNotCreatedYetException::new);
+        return Optional.ofNullable(fileInjector).map(IInjector::getWorkDir).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     public final String getAcceptedPath() {
-        return Optional.ofNullable(fileInjector).map(FileInjector::getAcceptedPath).orElseThrow(InjectorNotCreatedYetException::new);
+        return Optional.ofNullable(fileInjector).map(IInjector::getAcceptedPath).orElseThrow(InjectorNotCreatedYetException::new);
+    }
+
+    public final String getRejectedPath() {
+        return Optional.of(fileInjector).map(IInjector::getRejectedPath).orElseThrow(InjectorNotCreatedYetException::new);
+    }
+
+    public final String getRetryPath() {
+        return Optional.of(fileInjector).map(IInjector::getRetryPath).orElseThrow(InjectorNotCreatedYetException::new);
+    }
+
+    public final String getArchivePath() {
+        return Optional.of(fileInjector).map(IInjector::getArchivePath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     public final void acceptFlux(M flux) {
@@ -112,18 +147,6 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
         if (!moved) {
             logService.warn(() -> "Flux {0} was not moved to the rejected path!", flux.getFilename());
         }
-    }
-
-    public final String getRejectedPath() {
-        return Optional.of(fileInjector).map(FileInjector::getRejectedPath).orElseThrow(InjectorNotCreatedYetException::new);
-    }
-
-    public final String getRetryPath() {
-        return Optional.of(fileInjector).map(FileInjector::getRetryPath).orElseThrow(InjectorNotCreatedYetException::new);
-    }
-
-    public final String getArchivePath() {
-        return Optional.of(fileInjector).map(FileInjector::getArchivePath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     private final class FileInjector extends AbstractInjector<M> {
@@ -141,7 +164,7 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
 
         @Override
         protected void handleFlux(M flux) {
-            ProcessManager.getEngine(engineUuid).handle(super.getName(), flux);
+            AbstractFileAgent.this.handleFlux(flux, engineUuid);
         }
 
         @Override
@@ -154,13 +177,13 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
 
     private final class SimpleAgent extends AbstractAgent {
 
-        public SimpleAgent(String name) {
+        SimpleAgent(String name) {
             super(name);
         }
 
         @Override
         protected Agent getAgent() {
-            return AbstractFileAgent.this;
+            return AbstractFileAgent.this.getAgent();
         }
 
         @Override

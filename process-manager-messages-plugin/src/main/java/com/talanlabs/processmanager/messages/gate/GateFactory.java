@@ -17,6 +17,10 @@ public class GateFactory extends EngineAddon<GateFactory> implements IGateFactor
         gateList = new ArrayList<>();
     }
 
+    public List<Gate> getGateList() {
+        return new ArrayList<>(gateList);
+    }
+
     @Override
     public void disconnectAddon() {
         closeGates();

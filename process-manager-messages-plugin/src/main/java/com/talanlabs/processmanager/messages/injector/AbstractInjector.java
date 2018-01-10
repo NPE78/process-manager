@@ -76,18 +76,22 @@ public abstract class AbstractInjector<M extends AbstractImportFlux> extends Abs
      */
     protected abstract void handleFlux(M flux);
 
+    @Override
     public final String getAcceptedPath() {
         return acceptedPath;
     }
 
+    @Override
     public final String getRejectedPath() {
         return rejectedPath;
     }
 
+    @Override
     public final String getRetryPath() {
         return retryPath;
     }
 
+    @Override
     public final String getArchivePath() {
         return archivePath;
     }

@@ -27,4 +27,12 @@ public interface IInjector extends MessageInjector {
      */
     File getWorkDir();
 
+    String getAcceptedPath();
+
+    String getRejectedPath();
+
+    String getRetryPath();
+
+    String getArchivePath();
+
 }
