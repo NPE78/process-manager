@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ExportFluxTest {
@@ -37,6 +38,18 @@ public class ExportFluxTest {
     public void testFailed() throws IOException {
         MyFlux flux = new MyFlux();
         flux.write(new File(""), "test");
+    }
+
+    @Ignore("does't work on docker when user is root")
+    @Test(expected = IOException.class)
+    public void testReadOnly() throws IOException {
+        MyFlux flux = new MyFlux();
+        File file = new File(TestUtils.getErrorPath(), "readFile");
+        Assertions.assertThat(file.createNewFile()).isTrue();
+        Assertions.assertThat(file.setReadOnly()).isTrue();
+        Assertions.assertThat(file.setWritable(false, false)).isTrue();
+        Assertions.assertThat(file).exists();
+        flux.write(file, "test");
     }
 
     private class MyFlux extends AbstractExportFlux {
