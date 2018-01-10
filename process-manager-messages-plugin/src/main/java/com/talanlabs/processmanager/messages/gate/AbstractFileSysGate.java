@@ -80,6 +80,11 @@ public abstract class AbstractFileSysGate implements Gate {
         open();
     }
 
+    @Override
+    public File getEntranceFolder() {
+        return entranceFolder;
+    }
+
     private boolean mkdir(File folder) {
         return !folder.exists() && !folder.mkdirs();
     }

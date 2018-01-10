@@ -61,7 +61,9 @@ public class InjectorTest {
         GateFactory gateFactory = new GateFactory("test");
         MyInjector<MyFlux> myInjector = new MyInjector<>(MyFlux.class);
         gateFactory.buildGate("injectorTest", 500, myInjector);
+        Assertions.assertThat(gateFactory.getGateList()).hasSize(1);
         gateFactory.closeGates();
+        Assertions.assertThat(gateFactory.getGateList()).isEmpty();
 
         File accepted = new File(myInjector.getWorkDir(), "testAccepted");
         File retry = new File(myInjector.getWorkDir(), "testRetry");
