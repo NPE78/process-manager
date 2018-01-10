@@ -157,9 +157,6 @@ public class FileAgentTest {
             acceptFlux(flux);
         }
 
-        public void init() {
-        }
-
         @Override
         protected MyOtherFluxName createFlux() {
             return new MyOtherFluxName();
