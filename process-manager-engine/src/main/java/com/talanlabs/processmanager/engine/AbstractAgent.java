@@ -26,14 +26,25 @@ public abstract class AbstractAgent implements Agent {
         if (engineUuid == null) {
             throw new AgentException("You must provide an engineUuid");
         }
+        if (maxWorking <= 0) {
+            throw new AgentException("The max working must be an integer greater than 0");
+        }
         if (this.engineUuid != null && !this.engineUuid.equals(engineUuid)) {
             throw new AgentException("This agent (" + getName() + ") is already bound to an engine: " + this.engineUuid);
         }
         this.engineUuid = engineUuid;
 
-        Engine engine = ProcessManager.getEngine(engineUuid);
+        Engine engine = getEngine(engineUuid);
         PluggableChannel pluggableChannel = new ProcessingChannel(name, maxWorking, getAgent());
         engine.plugChannel(pluggableChannel);
+    }
+
+    private Engine getEngine(String engineUuid) {
+        Engine engine = ProcessManager.getEngine(engineUuid);
+        if (engine == null) {
+            throw new AgentException("The engine " + engineUuid +" does not exist");
+        }
+        return engine;
     }
 
     /**
