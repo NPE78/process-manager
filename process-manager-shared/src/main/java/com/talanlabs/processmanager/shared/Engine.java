@@ -25,6 +25,11 @@ public interface Engine extends MessageHandler {
     <V extends IEngineAddon> Optional<V> getAddon(Class<V> addonClass);
 
     /**
+     * Returns the list of channel slots
+     */
+    List<ChannelSlot> getChannelSlots();
+
+    /**
      * Returns the list of plugged channels
      */
     List<PluggableChannel> getPluggedChannels();
