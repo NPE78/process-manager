@@ -52,7 +52,6 @@
         <commons-io.version>2.6</commons-io.version>
     </properties>
 
-
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -200,5 +199,16 @@
         <module>process-manager-messages-plugin</module>
         <module>process-manager-example</module>
     </modules>
+
+    <distributionManagement>
+        <repository>
+            <id>talanlabs-releases-repository</id>
+            <url>http://nexus.talanlabs.com/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>talanlabs-snapshots-repository</id>
+            <url>http://nexus.talanlabs.com/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>

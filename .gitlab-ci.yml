@@ -45,3 +45,12 @@ test_sonar_job:
     - mvn --batch-mode verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN
   tags:
     - docker
+
+deploy_job:
+  stage: deploy
+  only:
+    - master
+  script:
+    - mvn --batch-mode deploy -DskipTests -Djacoco.skip=true
+  tags:
+    - docker
