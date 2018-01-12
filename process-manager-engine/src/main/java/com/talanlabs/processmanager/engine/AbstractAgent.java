@@ -22,17 +22,27 @@ public abstract class AbstractAgent implements Agent {
         return name;
     }
 
-    public final void register(String engineUuid, int maxWorking) {
+    /**
+     * Register the agent to the engine without creating a processing channel
+     */
+    public final void register(String engineUuid) {
         if (engineUuid == null) {
             throw new AgentException("You must provide an engineUuid");
-        }
-        if (maxWorking <= 0) {
-            throw new AgentException("The max working must be an integer greater than 0");
         }
         if (this.engineUuid != null && !this.engineUuid.equals(engineUuid)) {
             throw new AgentException("This agent (" + getName() + ") is already bound to an engine: " + this.engineUuid);
         }
         this.engineUuid = engineUuid;
+    }
+
+    /**
+     * Register the agent to the engine and create a processing channel
+     */
+    public void register(String engineUuid, int maxWorking) {
+        register(engineUuid);
+        if (maxWorking <= 0) {
+            throw new AgentException("The max working must be an integer greater than 0");
+        }
 
         Engine engine = getEngine(engineUuid);
         PluggableChannel pluggableChannel = new ProcessingChannel(name, maxWorking, getAgent());
