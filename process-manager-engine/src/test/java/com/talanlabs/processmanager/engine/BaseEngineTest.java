@@ -31,9 +31,11 @@ public class BaseEngineTest {
             String channelName = "channel";
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
             Assertions.assertThat(engine.getUuid()).isEqualTo("test");
+            Assertions.assertThat(engine.getChannelSlots()).isEmpty();
 
             engine.handle(channelName, "test message");
 
+            Assertions.assertThat(engine.getChannelSlots()).hasSize(1);
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
             Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
@@ -72,7 +74,9 @@ public class BaseEngineTest {
 
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
 
+            Assertions.assertThat(engine.getChannelSlots()).hasSize(1);
             engine.unplugChannel(channelName);
+            Assertions.assertThat(engine.getChannelSlots()).hasSize(1);
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
             Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
         } finally {
