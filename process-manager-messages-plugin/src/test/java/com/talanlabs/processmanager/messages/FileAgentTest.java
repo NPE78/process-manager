@@ -46,9 +46,21 @@ public class FileAgentTest {
             Assertions.assertThat(testFlux).doesNotExist();
             Assertions.assertThat(new File(myAgent.getAcceptedPath(), "testFile")).exists();
 
+            Assertions.assertThat(engine.getChannelSlots()).hasSize(1);
             Assertions.assertThat(engine.getPluggedChannels()).hasSize(1);
             myAgent.unregister();
             Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
+            Assertions.assertThat(engine.getChannelSlots()).hasSize(1);
+
+        } finally {
+            engine.shutdown();
+        }
+    }
+
+    @Test
+    public void testChannelSlot() throws BaseEngineCreationException {
+        Engine engine = ProcessManager.getInstance().createEngine("testChannelSlot", TestUtils.getErrorPath());
+        try  {
 
         } finally {
             engine.shutdown();

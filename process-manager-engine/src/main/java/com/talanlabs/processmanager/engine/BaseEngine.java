@@ -197,6 +197,13 @@ import java.util.stream.Collectors;
     }
 
     @Override
+    public List<ChannelSlot> getChannelSlots() {
+        synchronized (channelSlots) {
+            return new ArrayList<>(channelSlots.values());
+        }
+    }
+
+    @Override
     public List<PluggableChannel> getPluggedChannels() {
         synchronized (channelSlots) {
             return channelSlots.values().stream().filter(ChannelSlot::isPlugged).map(ChannelSlot::getPluggedChannel).collect(Collectors.toList());
