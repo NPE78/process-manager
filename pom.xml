@@ -8,6 +8,11 @@
     <artifactId>process-manager</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
+    <name>Process Manager</name>
+    <description>Process Manager, File injection, high performance multi-threadind, ...</description>
+    <url>http://www.talanlabs.com</url>
+
     <organization>
         <name>TalanLabs</name>
         <url>http://www.talanlabs.com</url>
@@ -26,6 +31,19 @@
             <email>nicolas.poste@talan.com</email>
         </developer>
     </developers>
+    <scm>
+        <connection>scm:git:https://gitlab.talanlabs.com/nicolas-poste/process-manager.git</connection>
+        <url>https://gitlab.talanlabs.com/nicolas-poste/process-manager</url>
+    </scm>
+    <ciManagement>
+        <system>gitlab-ci</system>
+        <url>https://gitlab.talanlabs.com/nicolas-poste/process-manager</url>
+    </ciManagement>
+    <issueManagement>
+        <system>gitlab</system>
+        <url>https://gitlab.talanlabs.com/nicolas-poste/process-manager/issues</url>
+    </issueManagement>
+
 
     <properties>
         <license.mailto>nicolas.poste@talan.com</license.mailto>
@@ -38,6 +56,7 @@
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.0.0-M1</maven-javadoc-plugin.version>
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
 
         <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
         <sonar.jacoco.itReportPath>${project.build.directory}/coverage-reports/jacoco-it.exec</sonar.jacoco.itReportPath>
@@ -201,14 +220,52 @@
     </modules>
 
     <distributionManagement>
-        <repository>
-            <id>talanlabs-releases-repository</id>
-            <url>http://nexus.talanlabs.com/content/repositories/releases/</url>
-        </repository>
         <snapshotRepository>
-            <id>talanlabs-snapshots-repository</id>
-            <url>http://nexus.talanlabs.com/content/repositories/snapshots/</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
     </distributionManagement>
+
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven-javadoc-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
