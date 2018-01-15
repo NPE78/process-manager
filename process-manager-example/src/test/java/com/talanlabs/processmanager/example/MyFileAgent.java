@@ -18,9 +18,9 @@ public class MyFileAgent extends AbstractFileAgent<MyFlux> {
     public void doWork(MyFlux flux, String engineUuid) {
         try {
             if ("invalid content".equals(flux.getContent())) {
-                rejectFlux(flux);
+                rejectFile(flux.getFile());
             } else {
-                acceptFlux(flux);
+                acceptFile(flux.getFile());
             }
         } catch (IOException e) {
             getLogService().warn(() -> "IOException", e);

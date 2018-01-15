@@ -29,7 +29,6 @@ public class ImportFluxTest {
 
         Assertions.assertThat(flux.getContent()).isEqualTo(content);
         Assertions.assertThat(flux.getContent()).isEqualTo(content);
-        Assertions.assertThat(flux.getFilename()).isEqualTo(filename);
     }
 
     @Test

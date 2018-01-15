@@ -21,9 +21,6 @@ public abstract class AbstractImportFlux extends AbstractFlux implements IImport
     }
 
     public void setFile(File file) {
-        if (file != null) {
-            setFilename(file.getName());
-        }
         this.file = file;
     }
 

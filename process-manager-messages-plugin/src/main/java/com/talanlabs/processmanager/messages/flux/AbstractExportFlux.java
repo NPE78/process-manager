@@ -22,7 +22,6 @@ public abstract class AbstractExportFlux extends AbstractFlux implements IExport
         try (FileOutputStream fos = new FileOutputStream(file)) {
             IOUtils.write(content, fos, CHARSET_UTF8);
         }
-        setFilename(file.getName());
         getSendInformation().setMessageContent(content);
         this.file = file;
     }

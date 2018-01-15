@@ -28,7 +28,6 @@ public class ExportFluxTest {
         try (FileInputStream fis = new FileInputStream(file)){
             Assertions.assertThat(IOUtils.toString(fis, "UTF-8")).isEqualTo(content);
         }
-        Assertions.assertThat(flux.getFilename()).isEqualTo(filename);
         Assertions.assertThat(flux.getSendInformation().isValid()).isTrue();
         Assertions.assertThat(flux.getSendInformation().getMessageContent()).isEqualTo(content);
     }
