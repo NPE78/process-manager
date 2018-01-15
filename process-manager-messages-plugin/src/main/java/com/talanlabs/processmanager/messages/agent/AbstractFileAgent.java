@@ -145,17 +145,17 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
         return Optional.of(fileInjector).map(IInjector::getArchivePath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
-    public final void acceptFlux(M flux) {
-        boolean moved = flux.getFile().renameTo(new File(getAcceptedPath(), flux.getFilename()));
+    public final void acceptFile(File file) {
+        boolean moved = file.renameTo(new File(getAcceptedPath(), file.getName()));
         if (!moved) {
-            logService.warn(() -> "Flux {0} was not moved to the accepted path!", flux.getFilename());
+            logService.warn(() -> "File {0} was not moved to the accepted path!", file.getName());
         }
     }
 
-    public final void rejectFlux(M flux) {
-        boolean moved = flux.getFile().renameTo(new File(getRejectedPath(), flux.getFilename()));
+    public final void rejectFile(File file) {
+        boolean moved = file.renameTo(new File(getRejectedPath(), file.getName()));
         if (!moved) {
-            logService.warn(() -> "Flux {0} was not moved to the rejected path!", flux.getFilename());
+            logService.warn(() -> "Flux {0} was not moved to the rejected path!", file.getName());
         }
     }
 

@@ -58,16 +58,6 @@ public class FileAgentTest {
     }
 
     @Test
-    public void testChannelSlot() throws BaseEngineCreationException {
-        Engine engine = ProcessManager.getInstance().createEngine("testChannelSlot", TestUtils.getErrorPath());
-        try  {
-
-        } finally {
-            engine.shutdown();
-        }
-    }
-
-    @Test
     public void testFileAgentReject() throws BaseEngineCreationException, IOException, InterruptedException {
         Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
@@ -120,11 +110,11 @@ public class FileAgentTest {
         flux.setFile(file);
 
         Assertions.assertThat(file).doesNotExist();
-        agent.acceptFlux(flux);
+        agent.acceptFile(file);
         Assertions.assertThat(file).doesNotExist();
 
         Assertions.assertThat(file).doesNotExist();
-        agent.rejectFlux(flux);
+        agent.rejectFile(file);
         Assertions.assertThat(file).doesNotExist();
     }
 
@@ -146,7 +136,7 @@ public class FileAgentTest {
 
         @Override
         public void doWork(MyFluxName flux, String engineUuid) {
-            rejectFlux(flux);
+            rejectFile(flux.getFile());
         }
 
         public void init() {
@@ -166,7 +156,7 @@ public class FileAgentTest {
 
         @Override
         public void doWork(MyOtherFluxName flux, String engineUuid) {
-            acceptFlux(flux);
+            acceptFile(flux.getFile());
         }
 
         @Override
