@@ -141,7 +141,7 @@ public class FileAgentTest {
     private class MyAgent extends AbstractFileAgent<MyFluxName> {
 
         MyAgent() {
-            super(MyFluxName.class);
+            super(MyFluxName.class, MyFluxName.class.getSimpleName());
         }
 
         @Override

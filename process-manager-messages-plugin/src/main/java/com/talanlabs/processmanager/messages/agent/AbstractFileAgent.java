@@ -28,6 +28,16 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
     private final Class<M> fluxClass;
     private IInjector fileInjector;
 
+    protected AbstractFileAgent(Class<M> fluxClass, String name) {
+        super();
+
+        this.simpleAgent = new SimpleAgent(name);
+
+        logService = LogManager.getLogService(getClass());
+
+        this.fluxClass = fluxClass;
+    }
+
     public AbstractFileAgent(Class<M> fluxClass) {
         super();
 
