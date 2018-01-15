@@ -125,26 +125,44 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
         return this;
     }
 
+    /**
+     * Returns the working folder of the injector/agent. This is the folder which is monitored for new messages
+     */
     public final File getWorkDir() {
         return Optional.ofNullable(fileInjector).map(IInjector::getWorkDir).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
+    /**
+     * Returns the folder where the messages are moved if they are accepted
+     */
     public final String getAcceptedPath() {
         return Optional.ofNullable(fileInjector).map(IInjector::getAcceptedPath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
+    /**
+     * Returns the folder where the messages are moved if they are rejected
+     */
     public final String getRejectedPath() {
         return Optional.of(fileInjector).map(IInjector::getRejectedPath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
+    /**
+     * Returns the folder where the messages are moved if they are to be retried
+     */
     public final String getRetryPath() {
         return Optional.of(fileInjector).map(IInjector::getRetryPath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
+    /**
+     * Returns the folder where the messages are moved if they are to be archived
+     */
     public final String getArchivePath() {
         return Optional.of(fileInjector).map(IInjector::getArchivePath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
+    /**
+     * Move file to the accepted folder
+     */
     public final void acceptFile(File file) {
         boolean moved = file.renameTo(new File(getAcceptedPath(), file.getName()));
         if (!moved) {
@@ -152,6 +170,9 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
         }
     }
 
+    /**
+     * Move file to the rejected folder
+     */
     public final void rejectFile(File file) {
         boolean moved = file.renameTo(new File(getRejectedPath(), file.getName()));
         if (!moved) {

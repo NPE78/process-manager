@@ -17,12 +17,24 @@
             <artifactId>process-manager-shared</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.talanlabs</groupId>
-            <artifactId>process-manager-shared</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>useTests</id>
+            <activation>
+                <property>
+                    <name>!maven.test.skip</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.talanlabs</groupId>
+                    <artifactId>process-manager-shared</artifactId>
+                    <version>${project.version}</version>
+                    <type>test-jar</type>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
