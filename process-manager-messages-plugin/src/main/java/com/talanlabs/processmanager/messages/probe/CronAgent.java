@@ -1,6 +1,6 @@
 package com.talanlabs.processmanager.messages.probe;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.engine.PM;
 import it.sauronsoftware.cron4j.Scheduler;
 
 public class CronAgent extends AbstractProbeAgent {
@@ -32,7 +32,7 @@ public class CronAgent extends AbstractProbeAgent {
     public void activateProbe(String engineUuid) {
         scheduler = new Scheduler();
         scheduler.setDaemon(true);
-        scheduler.schedule(schedulingPattern, () -> ProcessManager.handle(engineUuid, getChannel(), beat));
+        scheduler.schedule(schedulingPattern, () -> PM.handle(engineUuid, getChannel(), beat));
         scheduler.start();
     }
 

@@ -1,7 +1,7 @@
 package com.talanlabs.processmanager.messages.gate;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
-import com.talanlabs.processmanager.messages.agent.AbstractFileAgent;
+import com.talanlabs.processmanager.engine.PM;
+import com.talanlabs.processmanager.messages.agent.AbstractImportAgent;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.messages.injector.AbstractInjector;
 import com.talanlabs.processmanager.shared.TestUtils;
@@ -19,12 +19,12 @@ public class InjectorTest {
 
     @Before
     public void before() throws BaseEngineCreationException {
-        ProcessManager.getInstance().createEngine("test", TestUtils.getErrorPath());
+        PM.get().createEngine("test", TestUtils.getErrorPath());
     }
 
     @After
     public void after() {
-        ProcessManager.getInstance().shutdownEngine("test");
+        PM.get().shutdownEngine("test");
     }
 
     @Test
@@ -156,7 +156,7 @@ public class InjectorTest {
         }
     }
 
-    private class MyAgent<E extends AbstractImportFlux> extends AbstractFileAgent<E> {
+    private class MyAgent<E extends AbstractImportFlux> extends AbstractImportAgent<E> {
 
         private final LogService logService;
 

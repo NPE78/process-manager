@@ -1,6 +1,6 @@
 package com.talanlabs.processmanager.messages.probe;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
 
@@ -84,7 +84,7 @@ public class HeartbeatAgent extends AbstractProbeAgent {
             try {
                 sleep(delay);
                 do {
-                    ProcessManager.handle(engineUuid, channel, beat);
+                    PM.handle(engineUuid, channel, beat);
                     sleep(delay);
                 } while (active);
             } catch (InterruptedException e) {

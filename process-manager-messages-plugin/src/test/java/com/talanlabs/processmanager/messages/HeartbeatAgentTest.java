@@ -1,6 +1,6 @@
 package com.talanlabs.processmanager.messages;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.engine.ProcessingChannel;
 import com.talanlabs.processmanager.messages.probe.HeartbeatAgent;
 import com.talanlabs.processmanager.shared.Agent;
@@ -33,7 +33,7 @@ public class HeartbeatAgentTest {
 
     @Test
     public void testHeartbeat() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = ProcessManager.getInstance().createEngine("testHeartbeat", basePath);
+        Engine engine = PM.get().createEngine("testHeartbeat", basePath);
         try {
             HeartbeatAgent agent = new HeartbeatAgent("myChannel", "BEAT", 10);
 

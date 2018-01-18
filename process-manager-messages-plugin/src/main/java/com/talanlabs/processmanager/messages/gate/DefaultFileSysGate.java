@@ -1,6 +1,7 @@
 package com.talanlabs.processmanager.messages.gate;
 
-import com.talanlabs.processmanager.messages.injector.MessageInjector;
+import com.talanlabs.processmanager.messages.injector.IInjector;
+import com.talanlabs.processmanager.messages.model.FluxFolders;
 import java.io.File;
 
 /**
@@ -9,18 +10,11 @@ import java.io.File;
  */
 public class DefaultFileSysGate extends AbstractFileSysGate {
 
-    public DefaultFileSysGate(String engineUuid, String name, GateFolders gateFolders, long retryPeriod, MessageInjector injector) {
+    public DefaultFileSysGate(String engineUuid, String name, FluxFolders gateFolders, long retryPeriod, IInjector injector) {
         super(engineUuid, name, gateFolders, retryPeriod, injector);
-
-        init();
     }
 
-    public DefaultFileSysGate(String engineUuid, String name, File rootDir, long retryPeriod, MessageInjector injector) {
-        this(engineUuid, name, new GateFolders(rootDir,
-                new File(rootDir + "/accepted"),
-                new File(rootDir + "/rejected"),
-                new File(rootDir + "/retry"),
-                new File(rootDir + "/archive")),
-                retryPeriod, injector);
+    public DefaultFileSysGate(String engineUuid, String name, File rootDir, long retryPeriod, IInjector injector) {
+        this(engineUuid, name, FluxFolders.from(rootDir), retryPeriod, injector);
     }
 }

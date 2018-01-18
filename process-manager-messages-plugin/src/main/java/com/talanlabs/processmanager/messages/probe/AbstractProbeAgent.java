@@ -1,6 +1,6 @@
 package com.talanlabs.processmanager.messages.probe;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.engine.ProcessingChannel;
 import com.talanlabs.processmanager.messages.exceptions.AlreadyStartedProbeException;
 import java.io.Serializable;
@@ -46,7 +46,7 @@ public abstract class AbstractProbeAgent implements ProbeAgent {
             }
         };
 
-        ProcessManager.getEngine(engineUuid).plugChannel(pluggableChannel);
+        PM.getEngine(engineUuid).plugChannel(pluggableChannel);
         pluggableChannel.activate(engineUuid);
     }
 

@@ -32,7 +32,7 @@ To shutdown the whole engine, use `engine#shutdown` or `ProcessManager.getInstan
 ## File Agent
 
 An abstract agent is available to monitor a folder and dispatch files to the agent, given a maximum number of working agents at the same time.  
-See `AbstractFileAgent#register(String engineUuid, int maxWorking, long delay, File basePath)`
+See `AbstractImportAgent#register(String engineUuid, int maxWorking, long delay, File basePath)`
 
 ## Probe agents
 

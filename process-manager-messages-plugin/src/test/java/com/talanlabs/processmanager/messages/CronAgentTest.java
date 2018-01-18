@@ -1,6 +1,6 @@
 package com.talanlabs.processmanager.messages;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.engine.ProcessingChannel;
 import com.talanlabs.processmanager.messages.exceptions.AlreadyStartedProbeException;
 import com.talanlabs.processmanager.messages.probe.CronAgent;
@@ -31,7 +31,7 @@ public class CronAgentTest {
 
     @Test
     public void testCron() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = ProcessManager.getInstance().createEngine("testCron", basePath);
+        Engine engine = PM.get().createEngine("testCron", basePath);
         CronAgent agent;
         try {
             agent = new CronAgent("myChannel", "BEAT", "* * * * *");
@@ -54,7 +54,7 @@ public class CronAgentTest {
 
     @Test(expected = AlreadyStartedProbeException.class)
     public void testCronTwice() throws BaseEngineCreationException {
-        Engine engine = ProcessManager.getInstance().createEngine("testCron", basePath);
+        Engine engine = PM.get().createEngine("testCron", basePath);
         CronAgent agent;
         try {
             agent = new CronAgent("myChannel", "BEAT", "* * * * *");
@@ -71,7 +71,7 @@ public class CronAgentTest {
 
     @Test
     public void testCronStopHandle() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = ProcessManager.getInstance().createEngine("testCron", basePath);
+        Engine engine = PM.get().createEngine("testCron", basePath);
         CronAgent agent;
         try {
             agent = new CronAgent("myChannel", "BEAT", "* * * * *");

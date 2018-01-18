@@ -1,13 +1,12 @@
 package com.talanlabs.processmanager.messages.gate;
 
 import com.talanlabs.processmanager.engine.EngineAddon;
-import com.talanlabs.processmanager.messages.injector.MessageInjector;
-import com.talanlabs.processmanager.shared.IGateFactory;
+import com.talanlabs.processmanager.messages.injector.IInjector;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class GateFactory extends EngineAddon<GateFactory> implements IGateFactory {
+public class GateFactory extends EngineAddon<GateFactory> {
 
     private final List<Gate> gateList;
 
@@ -30,15 +29,14 @@ public class GateFactory extends EngineAddon<GateFactory> implements IGateFactor
         return new GateFactory(engineUuid).registerAddon();
     }
 
-    public Gate buildGate(String id, long delay, MessageInjector messageInjector) {
-        Gate gate = new DefaultFileSysGate(getEngineUuid(), id, messageInjector.getWorkDir(), delay, messageInjector);
+    public void buildGate(String id, long delay, IInjector injector) {
+        Gate gate = new DefaultFileSysGate(getEngineUuid(), id, injector.getWorkDir(), delay, injector);
         gateList.add(gate);
         getLogService().info(() -> "GATE INSTALLATION {0} SUCCESSFUL [{1}({2})][{3}]",
                 gate.getName(),
                 id,
-                messageInjector.getClass().getSimpleName(),
-                messageInjector.getWorkDir().getPath());
-        return gate;
+                injector.getClass().getSimpleName(),
+                injector.getWorkDir().getPath());
     }
 
     public void closeGates() {

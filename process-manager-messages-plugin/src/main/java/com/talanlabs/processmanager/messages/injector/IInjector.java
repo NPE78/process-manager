@@ -1,11 +1,19 @@
 package com.talanlabs.processmanager.messages.injector;
 
+import com.talanlabs.processmanager.messages.gate.Gate;
+import com.talanlabs.processmanager.messages.trigger.event.FileTriggerEvent;
 import java.io.File;
 
 /**
  * An interface for injectors
  */
-public interface IInjector extends MessageInjector {
+public interface IInjector {
+
+    Object inject(FileTriggerEvent evt);
+
+    Gate getGate();
+
+    void setGate(Gate g);
 
     /**
      * The name of the injector (and also agent)

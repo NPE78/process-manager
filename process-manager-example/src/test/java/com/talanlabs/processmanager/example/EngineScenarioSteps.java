@@ -1,6 +1,6 @@
 package com.talanlabs.processmanager.example;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.messages.gate.GateFactory;
 import com.talanlabs.processmanager.messages.trigger.TriggerEngine;
 import com.talanlabs.processmanager.shared.Engine;
@@ -17,7 +17,7 @@ import org.assertj.core.api.Assertions;
 
 public class EngineScenarioSteps {
 
-    private MyFileAgent agent;
+    private MyImportAgent agent;
     private File testFlux;
 
     private String expectedContent;
@@ -25,14 +25,14 @@ public class EngineScenarioSteps {
 
     @Given("^engine is created$")
     public void engineIsCreated() throws Throwable {
-        Engine engine = ProcessManager.getInstance().createEngine(getClass().getSimpleName(), TestUtils.getErrorPath());
+        Engine engine = PM.get().createEngine(getClass().getSimpleName(), TestUtils.getErrorPath());
         engine.addAddon(TriggerEngine.register(engine.getUuid())); // adding twice to test it is not blocking
         engine.addAddon(GateFactory.register(engine.getUuid())); // adding twice to test it is not blocking
     }
 
     @And("^agent is created and registered$")
     public void agentIsCreatedAndRegistered() {
-        agent = new MyFileAgent() {
+        agent = new MyImportAgent() {
             @Override
             public void doWork(MyFlux flux, String engineUuid) {
                 super.doWork(flux, engineUuid);
@@ -49,7 +49,7 @@ public class EngineScenarioSteps {
 
     @And("^engine is initialized$")
     public void engineIsInitialized() throws Throwable {
-        Engine engine = ProcessManager.getEngine(getClass().getSimpleName());
+        Engine engine = PM.getEngine(getClass().getSimpleName());
         engine.activateChannels();
 
         TestUtils.sleep(50);
@@ -106,6 +106,6 @@ public class EngineScenarioSteps {
 
     @Then("^shutdown the engine$")
     public void shutdownTheEngine() {
-        ProcessManager.getInstance().shutdownEngine(getClass().getSimpleName());
+        PM.get().shutdownEngine(getClass().getSimpleName());
     }
 }

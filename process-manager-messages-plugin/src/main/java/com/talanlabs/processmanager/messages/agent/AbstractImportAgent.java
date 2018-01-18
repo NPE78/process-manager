@@ -1,7 +1,7 @@
 package com.talanlabs.processmanager.messages.agent;
 
 import com.talanlabs.processmanager.engine.AbstractAgent;
-import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.messages.exceptions.InjectorNotCreatedYetException;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.messages.gate.GateFactory;
@@ -20,28 +20,22 @@ import java.util.Optional;
  *
  * @param <M> the type of flux managed by this agent
  */
-public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements Agent {
+public abstract class AbstractImportAgent<M extends AbstractImportFlux> implements Agent {
 
     private final LogService logService;
 
-    private final SimpleAgent simpleAgent;
+    private final SimpleAgent simpleAgent; // wrapped so that some methods are hidden
     private final Class<M> fluxClass;
-    private IInjector fileInjector;
+    private IInjector injector;
 
-    protected AbstractFileAgent(Class<M> fluxClass, String name) {
+    public AbstractImportAgent(Class<M> fluxClass) {
+        this(fluxClass, fluxClass.getSimpleName());
+    }
+
+    protected AbstractImportAgent(Class<M> fluxClass, String name) {
         super();
 
         this.simpleAgent = new SimpleAgent(name);
-
-        logService = LogManager.getLogService(getClass());
-
-        this.fluxClass = fluxClass;
-    }
-
-    public AbstractFileAgent(Class<M> fluxClass) {
-        super();
-
-        this.simpleAgent = new SimpleAgent(fluxClass.getSimpleName());
 
         logService = LogManager.getLogService(getClass());
 
@@ -65,9 +59,9 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
      * Builds an injector which simply handles any file event back to this agent, using the channel
      */
     protected IInjector buildInjector(String engineUuid, File basePath) {
-        fileInjector = new FileInjector(engineUuid, getName(), basePath); // done twice with #register, in case buildInjector is called separately
+        injector = new FileInjector(engineUuid, getName(), basePath); // done twice with #register, in case buildInjector is called separately
         // we could check a file injector wasn't set yet
-        return fileInjector;
+        return injector;
     }
 
     @SuppressWarnings("unchecked")
@@ -98,11 +92,11 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
     public void register(String engineUuid, int maxWorking, long delay, File basePath) {
         simpleAgent.register(engineUuid, maxWorking);
 
-        Engine engine = ProcessManager.getEngine(engineUuid);
+        Engine engine = PM.getEngine(engineUuid);
         GateFactory gateFactory = engine.getAddon(GateFactory.class)
                 .orElseGet(() -> GateFactory.register(engineUuid));
-        fileInjector = buildInjector(engineUuid, basePath);
-        gateFactory.buildGate(getName(), delay, fileInjector);
+        injector = buildInjector(engineUuid, basePath);
+        gateFactory.buildGate(getName(), delay, injector);
     }
 
     /**
@@ -118,7 +112,7 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
      * This method is called by the injector. It must not be called by an agent thread
      */
     protected void handleFlux(M flux, String engineUuid) {
-        ProcessManager.getEngine(engineUuid).handle(getName(), flux);
+        PM.getEngine(engineUuid).handle(getName(), flux);
     }
 
     protected Agent getAgent() {
@@ -129,35 +123,35 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
      * Returns the working folder of the injector/agent. This is the folder which is monitored for new messages
      */
     public final File getWorkDir() {
-        return Optional.ofNullable(fileInjector).map(IInjector::getWorkDir).orElseThrow(InjectorNotCreatedYetException::new);
+        return Optional.ofNullable(injector).map(IInjector::getWorkDir).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     /**
      * Returns the folder where the messages are moved if they are accepted
      */
     public final String getAcceptedPath() {
-        return Optional.ofNullable(fileInjector).map(IInjector::getAcceptedPath).orElseThrow(InjectorNotCreatedYetException::new);
+        return Optional.ofNullable(injector).map(IInjector::getAcceptedPath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     /**
      * Returns the folder where the messages are moved if they are rejected
      */
     public final String getRejectedPath() {
-        return Optional.of(fileInjector).map(IInjector::getRejectedPath).orElseThrow(InjectorNotCreatedYetException::new);
+        return Optional.of(injector).map(IInjector::getRejectedPath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     /**
      * Returns the folder where the messages are moved if they are to be retried
      */
     public final String getRetryPath() {
-        return Optional.of(fileInjector).map(IInjector::getRetryPath).orElseThrow(InjectorNotCreatedYetException::new);
+        return Optional.of(injector).map(IInjector::getRetryPath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     /**
      * Returns the folder where the messages are moved if they are to be archived
      */
     public final String getArchivePath() {
-        return Optional.of(fileInjector).map(IInjector::getArchivePath).orElseThrow(InjectorNotCreatedYetException::new);
+        return Optional.of(injector).map(IInjector::getArchivePath).orElseThrow(InjectorNotCreatedYetException::new);
     }
 
     /**
@@ -195,12 +189,12 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
 
         @Override
         protected void handleFlux(M flux) {
-            AbstractFileAgent.this.handleFlux(flux, engineUuid);
+            AbstractImportAgent.this.handleFlux(flux, engineUuid);
         }
 
         @Override
         public M createFlux() {
-            M flux = AbstractFileAgent.this.createFlux();
+            M flux = AbstractImportAgent.this.createFlux();
             flux.setName(super.getName());
             return flux;
         }
@@ -214,7 +208,7 @@ public abstract class AbstractFileAgent<M extends AbstractImportFlux> implements
 
         @Override
         protected Agent getAgent() {
-            return AbstractFileAgent.this.getAgent();
+            return AbstractImportAgent.this.getAgent();
         }
 
         @Override

@@ -1,7 +1,7 @@
 package com.talanlabs.processmanager.messages;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
-import com.talanlabs.processmanager.messages.agent.AbstractFileAgent;
+import com.talanlabs.processmanager.engine.PM;
+import com.talanlabs.processmanager.messages.agent.AbstractImportAgent;
 import com.talanlabs.processmanager.messages.exceptions.InjectorNotCreatedYetException;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.messages.gate.GateFactory;
@@ -13,11 +13,11 @@ import java.io.IOException;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class FileAgentTest {
+public class ImportAgentTest {
 
     @Test
     public void testFileAgent() throws BaseEngineCreationException, InterruptedException, IOException {
-        Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", TestUtils.getErrorPath());
+        Engine engine = PM.get().createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
             MyOtherAgent myAgent = new MyOtherAgent();
             myAgent.getLogService().info(() -> "Testing myAgent");
@@ -59,7 +59,7 @@ public class FileAgentTest {
 
     @Test
     public void testFileAgentReject() throws BaseEngineCreationException, IOException, InterruptedException {
-        Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", TestUtils.getErrorPath());
+        Engine engine = PM.get().createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
             MyAgent myAgent = new MyAgent();
 
@@ -84,7 +84,7 @@ public class FileAgentTest {
 
     @Test(expected = InjectorNotCreatedYetException.class)
     public void testAgentNotRegistered() throws BaseEngineCreationException {
-        Engine engine = ProcessManager.getInstance().createEngine("testFileAgent", TestUtils.getErrorPath());
+        Engine engine = PM.get().createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
             MyAgent myAgent = new MyAgent();
             myAgent.getLogService().info(() -> "Testing myAgent");
@@ -128,7 +128,7 @@ public class FileAgentTest {
 
     }
 
-    private class MyAgent extends AbstractFileAgent<MyFluxName> {
+    private class MyAgent extends AbstractImportAgent<MyFluxName> {
 
         MyAgent() {
             super(MyFluxName.class, MyFluxName.class.getSimpleName());
@@ -148,7 +148,7 @@ public class FileAgentTest {
         }
     }
 
-    private class MyOtherAgent extends AbstractFileAgent<MyOtherFluxName> {
+    private class MyOtherAgent extends AbstractImportAgent<MyOtherFluxName> {
 
         MyOtherAgent() {
             super(MyOtherFluxName.class);

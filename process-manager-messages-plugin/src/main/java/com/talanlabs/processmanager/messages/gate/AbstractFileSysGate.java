@@ -1,8 +1,9 @@
 package com.talanlabs.processmanager.messages.gate;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.messages.exceptions.InvalidGateStateException;
-import com.talanlabs.processmanager.messages.injector.MessageInjector;
+import com.talanlabs.processmanager.messages.injector.IInjector;
+import com.talanlabs.processmanager.messages.model.FluxFolders;
 import com.talanlabs.processmanager.messages.trigger.ThreadedTrigger;
 import com.talanlabs.processmanager.messages.trigger.TriggerEngine;
 import com.talanlabs.processmanager.messages.trigger.api.Trigger;
@@ -28,31 +29,29 @@ public abstract class AbstractFileSysGate implements Gate {
 
     private final String engineUuid;
     private final String name;
-    private final File entranceFolder;
-    private final File acceptedFolder;
-    private final File rejectedFolder;
-    private final File retryFolder;
-    private final File archiveFolder;
+    private final FluxFolders fluxFolders;
     private final long retryPeriod;
-    private final MessageInjector messageInjector;
+    private final IInjector injector;
 
     private boolean opened;
     private RetryThread retryThread;
 
-    AbstractFileSysGate(String engineUuid, String name, GateFolders gateFolders, long retryPeriod, MessageInjector injector) {
+    AbstractFileSysGate(String engineUuid, String name, FluxFolders fluxFolders, long retryPeriod, IInjector injector) {
 
         logService = LogManager.getLogService(getClass());
 
         this.engineUuid = engineUuid;
         this.name = name;
-        this.entranceFolder = gateFolders.getEntranceFolder();
-        this.acceptedFolder = gateFolders.getAcceptedFolder();
-        this.rejectedFolder = gateFolders.getRejectedFolder();
-        this.archiveFolder = gateFolders.getArchiveFolder();
-        this.retryFolder = gateFolders.getRetryFolder();
+
+        this.fluxFolders = fluxFolders;
+
         this.retryPeriod = retryPeriod;
-        this.messageInjector = injector;
-        this.messageInjector.setGate(this);
+        this.injector = injector;
+        this.injector.setGate(this);
+
+        fluxFolders.init();
+
+        open();
     }
 
     @Override
@@ -60,56 +59,32 @@ public abstract class AbstractFileSysGate implements Gate {
         return name;
     }
 
-    void init() {
-        if (mkdir(entranceFolder)) {
-            logService.warn(() -> "Entrance Folder not created for " + name);
-        }
-        if (mkdir(acceptedFolder)) {
-            logService.warn(() -> "Accepted Folder not created for " + name);
-        }
-        if (mkdir(rejectedFolder)) {
-            logService.warn(() -> "Rejected Folder not created for " + name);
-        }
-        if (mkdir(archiveFolder)) {
-            logService.warn(() -> "Archive Folder not created for " + name);
-        }
-        if (mkdir(retryFolder)) {
-            logService.warn(() -> "Retry Folder not created for " + name);
-        }
-
-        open();
-    }
-
     @Override
     public File getEntranceFolder() {
-        return entranceFolder;
-    }
-
-    private boolean mkdir(File folder) {
-        return !folder.exists() && !folder.mkdirs();
+        return fluxFolders.getEntranceFolder();
     }
 
     private File resolveEntranceFile(String msgID) {
-        return new File(entranceFolder, msgID);
+        return new File(fluxFolders.getEntranceFolder(), msgID);
     }
 
     private File resolveAcceptedFile(String msgID) {
-        return new File(acceptedFolder, msgID);
+        return new File(fluxFolders.getAcceptedFolder(), msgID);
     }
 
     protected File resolveRejectedFile(String msgID) {
-        return new File(rejectedFolder, msgID);
+        return new File(fluxFolders.getRejectedFolder(), msgID);
     }
 
     private File resolveRetryFile(String msgID) {
-        return new File(retryFolder, msgID);
+        return new File(fluxFolders.getRetryFolder(), msgID);
     }
 
     @Override
     public void createNewFile(String msgID, String data) {
-        File nf = new File(entranceFolder, msgID);
+        File nf = new File(fluxFolders.getEntranceFolder(), msgID);
         logService.debug(() -> "Creating new File : " + nf.getAbsolutePath());
-        File lck = new File(entranceFolder, msgID + ".lck");
+        File lck = new File(fluxFolders.getEntranceFolder(), msgID + ".lck");
         try (OutputStream os = new FileOutputStream(nf)) {
             if (!lck.createNewFile()) {
                 logService.warn(() -> "Create lock {0} failed.", msgID);
@@ -154,13 +129,13 @@ public abstract class AbstractFileSysGate implements Gate {
     @Override
     public void archive(String msgID) {
         File f = resolveAcceptedFile(msgID);
-        moveFileToFolder(f, msgID, archiveFolder);
+        moveFileToFolder(f, msgID, fluxFolders.getArchiveFolder());
     }
 
     @Override
     public void accept(String msgID) {
         File f = resolveEntranceFile(msgID);
-        moveFileToFolder(f, msgID, acceptedFolder);
+        moveFileToFolder(f, msgID, fluxFolders.getAcceptedFolder());
     }
 
     private void moveFileToFolder(File sourceFolder, String filename, File folder) {
@@ -178,7 +153,7 @@ public abstract class AbstractFileSysGate implements Gate {
     public void reject(String msgID) {
         File f = resolveEntranceFile(msgID);
         if (f.exists()) {
-            boolean remove = f.renameTo(new File(rejectedFolder, msgID));
+            boolean remove = f.renameTo(new File(fluxFolders.getRejectedFolder(), msgID));
             if (remove) {
                 logService.debug(() -> "REJET DU MESSAGE {0} ({1})", msgID, f.getAbsolutePath());
             } else {
@@ -194,7 +169,7 @@ public abstract class AbstractFileSysGate implements Gate {
         File f = resolveEntranceFile(msgID);
         logService.info(() -> "RETRYING FILE {0} ({1})", msgID, f.getAbsolutePath());
         if (f.exists()) {
-            boolean remove = f.renameTo(new File(retryFolder, msgID));
+            boolean remove = f.renameTo(new File(fluxFolders.getRetryFolder(), msgID));
             if (remove) {
                 logService.debug(() -> "RETRYING FILE {0} ({1})", msgID, f.getAbsolutePath());
             } else {
@@ -207,7 +182,7 @@ public abstract class AbstractFileSysGate implements Gate {
 
     @Override
     public void close() {
-        ProcessManager.getEngine(engineUuid).getAddon(TriggerEngine.class)
+        PM.getEngine(engineUuid).getAddon(TriggerEngine.class)
                 .ifPresent(te -> te.uninstallTrigger(name));
         opened = false;
     }
@@ -226,22 +201,22 @@ public abstract class AbstractFileSysGate implements Gate {
             throw new InvalidGateStateException("Retry thread is still active");
         }
         // install and start trigger
-        TriggerEngine triggerEngine = ProcessManager.getEngine(engineUuid).getAddon(TriggerEngine.class)
+        TriggerEngine triggerEngine = PM.getEngine(engineUuid).getAddon(TriggerEngine.class)
                 .orElseGet(() -> TriggerEngine.register(engineUuid));
 
-        TriggerEventListener tel = evt -> messageInjector.inject((FileTriggerEvent) evt);
+        TriggerEventListener tel = evt -> injector.inject((FileTriggerEvent) evt);
 
-        logService.debug(() -> "ADD LISTENER TO TRIGGER ENGINE ON: " + entranceFolder.getAbsolutePath());
+        logService.debug(() -> "ADD LISTENER TO TRIGGER ENGINE ON: " + fluxFolders.getEntranceFolder().getAbsolutePath());
         triggerEngine.addListener(tel);
 
-        Trigger t = new ThreadedTrigger(name, new FolderEventTriggerTask(entranceFolder, ".lck"), 200);
+        Trigger t = new ThreadedTrigger(name, new FolderEventTriggerTask(fluxFolders.getEntranceFolder(), ".lck"), 200);
         triggerEngine.installTrigger(t, true);
 
         opened = true;
 
         if (retryPeriod > 0) {
             // install retry thread
-            retryThread = new RetryThread(retryPeriod, retryFolder, this);
+            retryThread = new RetryThread(retryPeriod, fluxFolders.getRetryFolder(), this);
             retryThread.start();
         }
     }

@@ -13,7 +13,7 @@ public class EngineAddonTest {
         Checks checks = new Checks();
 
         String engineUuid = "testEngineAddon";
-        Engine engine = ProcessManager.getInstance().createEngine(engineUuid, TestUtils.getErrorPath());
+        Engine engine = PM.get().createEngine(engineUuid, TestUtils.getErrorPath());
         try {
             MyAddon addon = MyAddon.register(checks, engineUuid);
             addon.getLogService().info(() -> "Testing myAddon");
@@ -28,7 +28,7 @@ public class EngineAddonTest {
             Assertions.assertThat(addon == addon2).isTrue();
             Assertions.assertThat(engine.getAddon(MyAddon.class).get()).isEqualTo(addon);
         } finally {
-            ProcessManager.getInstance().shutdownEngine(engineUuid);
+            PM.get().shutdownEngine(engineUuid);
         }
         Assertions.assertThat(checks.disconnected).isTrue();
     }
