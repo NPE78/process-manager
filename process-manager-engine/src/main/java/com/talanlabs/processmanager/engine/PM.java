@@ -7,16 +7,19 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProcessManager {
+/**
+ * ProcessManager singleton
+ */
+public class PM {
 
     private final Map<String, Engine> engineMap;
 
-    private ProcessManager() {
+    private PM() {
         engineMap = new ConcurrentHashMap<>();
     }
 
-    public static ProcessManager getInstance() {
-        return ProcessManager.SingletonHolder.instance;
+    public static PM get() {
+        return PM.SingletonHolder.instance;
     }
 
     public static void handle(String uuid, String channelName, Serializable message) {
@@ -69,7 +72,7 @@ public class ProcessManager {
      * Returns the engine associated to the given uuid
      */
     public static Engine getEngine(String uuid) {
-        return getInstance().getEngineInternal(uuid);
+        return get().getEngineInternal(uuid);
     }
 
     private Engine getEngineInternal(String uuid) {
@@ -82,13 +85,13 @@ public class ProcessManager {
      * Sécurité anti-désérialisation
      */
     private Object readResolve() {
-        return getInstance();
+        return get();
     }
 
     /**
      * Holder
      */
     private static final class SingletonHolder {
-        private static final ProcessManager instance = new ProcessManager();
+        private static final PM instance = new PM();
     }
 }

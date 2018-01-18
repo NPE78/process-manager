@@ -50,7 +50,7 @@ public abstract class AbstractAgent implements Agent {
     }
 
     private Engine getEngine(String engineUuid) {
-        Engine engine = ProcessManager.getEngine(engineUuid);
+        Engine engine = PM.getEngine(engineUuid);
         if (engine == null) {
             throw new AgentException("The engine " + engineUuid +" does not exist");
         }
@@ -61,7 +61,7 @@ public abstract class AbstractAgent implements Agent {
      * Unregister from the current engine and stop the channel
      */
     public final void unregister() {
-        ProcessManager.getEngine(engineUuid).unplugChannel(getName());
+        PM.getEngine(engineUuid).unplugChannel(getName());
         this.engineUuid = null;
     }
 

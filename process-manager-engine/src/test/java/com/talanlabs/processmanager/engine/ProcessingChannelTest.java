@@ -11,7 +11,7 @@ public class ProcessingChannelTest {
 
     @Test(expected = NotStartedChannelException.class)
     public void testHeartbeat() throws BaseEngineCreationException {
-        Engine engine = ProcessManager.getInstance().createEngine("testHeartbeat", TestUtils.getErrorPath());
+        Engine engine = PM.get().createEngine("testHeartbeat", TestUtils.getErrorPath());
         try {
             Agent agent = (message, engineUuid) -> {
             };

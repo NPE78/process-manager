@@ -1,16 +1,18 @@
 package com.talanlabs.processmanager.messages.injector;
 
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
+import com.talanlabs.processmanager.messages.gate.Gate;
 import com.talanlabs.processmanager.messages.trigger.event.FileTriggerEvent;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
-import java.io.File;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
 
 /**
  * An abstract injector used to import flux<br>
  */
-public abstract class AbstractInjector<M extends AbstractImportFlux> extends AbstractMsgInjector implements IInjector {
+public abstract class AbstractInjector<M extends AbstractImportFlux> implements IInjector {
 
     private final LogService logService;
 
@@ -21,6 +23,9 @@ public abstract class AbstractInjector<M extends AbstractImportFlux> extends Abs
     private final String rejectedPath;
     private final String archivePath;
 
+    private Gate gate;
+    private final File workDir;
+
     /**
      * Builds an injector dedicated to managing flux of the given type
      *
@@ -28,23 +33,38 @@ public abstract class AbstractInjector<M extends AbstractImportFlux> extends Abs
      * @param baseWorkdir the base work directory (parent of where the injector folder will be located)
      */
     public AbstractInjector(String name, String baseWorkdir) {
-        super(baseWorkdir);
+        super();
 
         logService = LogManager.getLogService(getClass());
 
         this.name = name;
 
-        String workDir = StringUtils.appendIfMissing(baseWorkdir, File.separator) + name + File.separator;
-        this.acceptedPath = workDir + "accepted" + File.separator;
-        this.retryPath = workDir + "retry" + File.separator;
-        this.rejectedPath = workDir + "rejected" + File.separator;
-        this.archivePath = workDir + "archive" + File.separator;
-        setWorkDir(new File(workDir));
+        String workDirPath = StringUtils.appendIfMissing(baseWorkdir, File.separator) + name + File.separator;
+        this.acceptedPath = workDirPath + "accepted" + File.separator;
+        this.retryPath = workDirPath + "retry" + File.separator;
+        this.rejectedPath = workDirPath + "rejected" + File.separator;
+        this.archivePath = workDirPath + "archive" + File.separator;
+        this.workDir = new File(workDirPath);
+    }
+
+    @Override
+    public final Gate getGate() {
+        return gate;
+    }
+
+    @Override
+    public final void setGate(Gate g) {
+        this.gate = g;
     }
 
     @Override
     public final String getName() {
         return name;
+    }
+
+    @Override
+    public final File getWorkDir() {
+        return workDir;
     }
 
     /**

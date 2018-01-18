@@ -30,19 +30,19 @@ public class AgentTest {
 
     @Test(expected = AgentException.class)
     public void testAgentExceptionBoundTwice() throws BaseEngineCreationException {
-        ProcessManager.getInstance().createEngine("testAgent", TestUtils.getErrorPath());
+        PM.get().createEngine("testAgent", TestUtils.getErrorPath());
         try {
             MyAgent agent = new MyAgent();
             agent.register("testAgent", 1);
             agent.register("testAgent2", 1);
         } finally {
-            ProcessManager.getInstance().shutdownEngine("testAgent");
+            PM.get().shutdownEngine("testAgent");
         }
     }
 
     @Test
     public void testAgentValid() throws BaseEngineCreationException {
-        Engine engine = ProcessManager.getInstance().createEngine("testAgent", TestUtils.getErrorPath());
+        Engine engine = PM.get().createEngine("testAgent", TestUtils.getErrorPath());
         try {
             Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
 
@@ -55,7 +55,7 @@ public class AgentTest {
             agent.unregister();
             Assertions.assertThat(engine.getPluggedChannels()).isEmpty();
         } finally {
-            ProcessManager.getInstance().shutdownEngine("testAgent");
+            PM.get().shutdownEngine("testAgent");
         }
     }
 

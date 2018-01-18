@@ -1,11 +1,11 @@
 package com.talanlabs.processmanager.example;
 
-import com.talanlabs.processmanager.messages.agent.AbstractFileAgent;
+import com.talanlabs.processmanager.messages.agent.AbstractImportAgent;
 import java.io.IOException;
 
-public class MyFileAgent extends AbstractFileAgent<MyFlux> {
+public class MyImportAgent extends AbstractImportAgent<MyFlux> {
 
-    MyFileAgent() {
+    MyImportAgent() {
         super(MyFlux.class);
     }
 

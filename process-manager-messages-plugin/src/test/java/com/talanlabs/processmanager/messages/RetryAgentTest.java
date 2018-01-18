@@ -1,6 +1,6 @@
 package com.talanlabs.processmanager.messages;
 
-import com.talanlabs.processmanager.engine.ProcessManager;
+import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.engine.ProcessingChannel;
 import com.talanlabs.processmanager.messages.agent.RetryAgent;
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
@@ -37,7 +37,7 @@ public class RetryAgentTest {
 
     @Test
     public void testRetryAgent() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = ProcessManager.getInstance().createEngine("testRetry", errorPath);
+        Engine engine = PM.get().createEngine("testRetry", errorPath);
         try {
             engine.plugChannel(new MyChannel());
             engine.plugChannel(new MyRetryChannel());
@@ -80,7 +80,7 @@ public class RetryAgentTest {
         @Override
         public void work(Serializable message, String engineUuid) {
             logService.info(() -> "Received message of type " + message.getClass());
-            ProcessManager.getEngine(engineUuid).handle("retryChannel", message);
+            PM.getEngine(engineUuid).handle("retryChannel", message);
         }
     }
 

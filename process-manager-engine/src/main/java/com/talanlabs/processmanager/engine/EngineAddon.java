@@ -35,7 +35,7 @@ public abstract class EngineAddon<V extends EngineAddon> implements Engine.IEngi
     @SuppressWarnings("unchecked")
     protected final V registerAddon() {
         try {
-            Engine engine = ProcessManager.getEngine(engineUuid);
+            Engine engine = PM.getEngine(engineUuid);
             engine.addAddon(this);
         } catch (AddonAlreadyBoundException e) {
             logService.warn(() -> "Addon trigger engine has been bound twice", e);
