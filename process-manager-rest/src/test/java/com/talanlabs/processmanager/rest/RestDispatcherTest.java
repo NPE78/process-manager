@@ -18,10 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-public class RestAgentTest {
+public class RestDispatcherTest {
 
     @Test
-    public void testRestAgent() throws BaseEngineCreationException, InterruptedException {
+    public void testDispatcherAgent() throws BaseEngineCreationException, InterruptedException {
         Engine engine = PM.get().createEngine("rest", TestUtils.getErrorPath());
         List<String> failures = new ArrayList<>(3);
         CountDownLatch cdlToConsume = new CountDownLatch(3);
