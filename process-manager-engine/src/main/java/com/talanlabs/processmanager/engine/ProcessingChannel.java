@@ -6,7 +6,6 @@ import com.talanlabs.processmanager.shared.Channel;
 import com.talanlabs.processmanager.shared.ChannelSlot;
 import com.talanlabs.processmanager.shared.HandleReport;
 import com.talanlabs.processmanager.shared.PluggableChannel;
-import com.talanlabs.processmanager.shared.exceptions.ChannelStateException;
 import com.talanlabs.processmanager.shared.exceptions.NotStartedChannelException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;

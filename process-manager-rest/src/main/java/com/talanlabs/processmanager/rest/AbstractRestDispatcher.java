@@ -32,6 +32,13 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
 
     private boolean activated;
 
+    private final Object getLock = new Object();
+    private final Object postLock = new Object();
+    private final Object putLock = new Object();
+    private final Object patchLock = new Object();
+    private final Object deleteLock = new Object();
+    private final Object defaultLock = new Object();
+
     public AbstractRestDispatcher(String name) {
         logService = LogManager.getLogService(getClass());
 
@@ -89,13 +96,32 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
         }
     }
 
+    private Object getLock(String method) {
+        switch (method) {
+            case "GET":
+                return getLock;
+            case "POST":
+                return postLock;
+            case "PUT":
+                return putLock;
+            case "PATCH":
+                return patchLock;
+            case "DELETE":
+                return deleteLock;
+            default:
+                return defaultLock;
+        }
+    }
+
     private void doHandle(Context context, IRestAgent agent) {
         CountDownLatch cdl = null;
         Serializable message = agent.extract(context);
 
-        synchronized (agent.getName().intern()) {
+        synchronized (getLock(context.request().getMethod())) {
             Engine engine = PM.getEngine(agent.getEngineUuid());
-            if (engine.getNbPending(agent.getName()) >= agent.getMaxWaiting()) {
+            int nbPending = engine.getNbPending(agent.getName());
+            int maxWaiting = agent.getMaxWaiting();
+            if (nbPending >= maxWaiting) {
                 throw new HaltException(HttpStatus.TOO_MANY_REQUESTS_429, "Too many calls");
             } else {
                 if (shouldLock()) {
@@ -141,7 +167,7 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
      * The timeout in case the lock is used
      */
     protected long getTimeout() {
-        return 120 * 1000; // 2min
+        return 120L * 1000L; // 2min
     }
 
 

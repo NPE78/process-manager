@@ -1,6 +1,7 @@
 package com.talanlabs.processmanager.rest;
 
 import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.response.Response;
 import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.rest.agent.AbstractRestAgent;
 import com.talanlabs.processmanager.rest.agent.IRestAgent;
@@ -8,10 +9,13 @@ import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import io.javalin.Context;
+import org.assertj.core.api.Assertions;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.Test;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class RestAgentTest {
@@ -19,6 +23,10 @@ public class RestAgentTest {
     @Test
     public void testRestAgent() throws BaseEngineCreationException, InterruptedException {
         Engine engine = PM.get().createEngine("rest", TestUtils.getErrorPath());
+        List<String> failures = new ArrayList<>(3);
+        CountDownLatch cdlToConsume = new CountDownLatch(3);
+        CountDownLatch cdlStart = new CountDownLatch(1);
+        CountDownLatch cdlEnd = new CountDownLatch(3);
         try {
             MyRestDispatcher myRestAgent = new MyRestDispatcher();
 
@@ -31,30 +39,36 @@ public class RestAgentTest {
 
             engine.activateChannels();
 
-            CountDownLatch cdl = new CountDownLatch(3);
-            CountDownLatch cdl2 = new CountDownLatch(1);
-            new Thread(() -> {
-                cdl.countDown();
-                waitFor(cdl2, 0);
-                RestAssured.given().when().get("http://localhost:8080/rest?hello=hi").then().statusCode(200);
-            }).start();
-            new Thread(() -> {
-                cdl.countDown();
-                waitFor(cdl2, 100);
-                RestAssured.given().when().get("http://localhost:8080/rest?hello=hi").then().statusCode(200);
-            }).start();
-            new Thread(() -> {
-                cdl.countDown();
-                waitFor(cdl2, 200);
-                RestAssured.given().when().get("http://localhost:8080/rest?hello=hi").then().statusCode(HttpStatus.TOO_MANY_REQUESTS_429);
-            }).start();
+            new Thread(() -> threadRun(failures, cdlStart, cdlToConsume, cdlEnd)).start();
+            new Thread(() -> threadRun(failures, cdlStart, cdlToConsume, cdlEnd)).start();
+            new Thread(() -> threadRun(failures, cdlStart, cdlToConsume, cdlEnd)).start();
 
-            cdl.await(); // waiting for the 3 threads to be ready
-            cdl2.countDown();
-
+            cdlToConsume.await(); // waiting for the 3 threads to be ready
+            cdlStart.countDown();
         } finally {
-            TestUtils.sleep(2000);
+            cdlEnd.await();
+
             engine.shutdown();
+            Assertions.assertThat(failures).hasSize(1);
+        }
+    }
+
+    private void threadRun(List<String> failures, CountDownLatch cdlStart, CountDownLatch cdlToConsume, CountDownLatch cdlEnd) {
+        try {
+            test(failures, cdlStart, cdlToConsume);
+        } finally {
+            cdlEnd.countDown();
+        }
+    }
+
+    private void test(List<String> failures, CountDownLatch cdlStart, CountDownLatch cdlToConsume) {
+        cdlToConsume.countDown();
+        waitFor(cdlStart);
+        Response response = RestAssured.given().when().get("/rest?param=test");
+        try {
+            response.then().statusCode(HttpStatus.OK_200);
+        } catch (AssertionError e) {
+            failures.add(e.getMessage());
         }
     }
 
@@ -100,11 +114,10 @@ public class RestAgentTest {
         }
     }
 
-    private void waitFor(CountDownLatch cdl, int i) {
+    private void waitFor(CountDownLatch cdl) {
 
         try {
             cdl.await();
-            TestUtils.sleep(i);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -122,7 +135,7 @@ public class RestAgentTest {
 
         @Override
         protected long getTimeout() {
-            return 10L;
+            return 1000L;
         }
 
         @Override
@@ -154,7 +167,7 @@ public class RestAgentTest {
         @Override
         protected void doWork(Serializable message, Context context) {
             try {
-                TestUtils.sleep(500);
+                TestUtils.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
