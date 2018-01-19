@@ -66,7 +66,7 @@ public class AgentTest {
         }
 
         @Override
-        public void work(Serializable message, String engineUuid) {
+        public void work(Serializable message) {
 
         }
     }

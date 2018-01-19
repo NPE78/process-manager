@@ -29,7 +29,7 @@ public abstract class AbstractInjector<M extends AbstractImportFlux> implements 
     /**
      * Builds an injector dedicated to managing flux of the given type
      *
-     * @param name   the name of the flux (which is also the name of the final folder). Must be unique
+     * @param name        the name of the flux (which is also the name of the final folder). Must be unique
      * @param baseWorkdir the base work directory (parent of where the injector folder will be located)
      */
     public AbstractInjector(String name, String baseWorkdir) {

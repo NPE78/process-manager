@@ -8,10 +8,11 @@ import com.talanlabs.processmanager.messages.gate.GateFactory;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
-import java.io.File;
-import java.io.IOException;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
 
 public class ImportAgentTest {
 
@@ -76,7 +77,7 @@ public class ImportAgentTest {
             Assertions.assertThat(testFlux).doesNotExist();
             Assertions.assertThat(new File(myAgent.getRejectedPath(), "rejectedFile")).exists();
 
-            myAgent.work("Invalid msg", null); // does nothing
+            myAgent.work("Invalid msg"); // does nothing
         } finally {
             engine.shutdown();
         }
@@ -135,7 +136,7 @@ public class ImportAgentTest {
         }
 
         @Override
-        public void doWork(MyFluxName flux, String engineUuid) {
+        public void doWork(MyFluxName flux) {
             rejectFile(flux.getFile());
         }
 
@@ -155,7 +156,7 @@ public class ImportAgentTest {
         }
 
         @Override
-        public void doWork(MyOtherFluxName flux, String engineUuid) {
+        public void doWork(MyOtherFluxName flux) {
             acceptFile(flux.getFile());
         }
 

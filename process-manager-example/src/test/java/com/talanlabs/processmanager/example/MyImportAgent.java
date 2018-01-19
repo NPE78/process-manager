@@ -15,7 +15,7 @@ public class MyImportAgent extends AbstractImportAgent<MyFlux> {
     }
 
     @Override
-    public void doWork(MyFlux flux, String engineUuid) {
+    public void doWork(MyFlux flux) {
         try {
             if ("invalid content".equals(flux.getContent())) {
                 rejectFile(flux.getFile());

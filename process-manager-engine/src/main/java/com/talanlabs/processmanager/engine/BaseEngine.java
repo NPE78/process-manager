@@ -10,6 +10,7 @@ import com.talanlabs.processmanager.shared.PluggableChannel;
 import com.talanlabs.processmanager.shared.exceptions.AddonAlreadyBoundException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -147,7 +148,7 @@ import java.util.stream.Collectors;
     public void activateChannels() {
         synchronized (channelSlots) {
             for (ChannelSlot ch : channelSlots.values()) {
-                ch.activate(getUuid());
+                ch.activate();
             }
         }
     }
@@ -167,6 +168,12 @@ import java.util.stream.Collectors;
     public int getNbWorking(String channelName) {
         ChannelSlot channelSlot = resolveChannelSlot(channelName);
         return channelSlot.getNbWorking();
+    }
+
+    @Override
+    public int getNbPending(String channelName) {
+        ChannelSlot channelSlot = resolveChannelSlot(channelName);
+        return channelSlot.getNbPending();
     }
 
     /**
@@ -279,10 +286,12 @@ import java.util.stream.Collectors;
 
         @Override
         public int getNbWorking() {
-            if (channel != null) {
-                return channel.getNbWorking();
-            }
-            return -1;
+            return channel != null ? channel.getNbWorking() : -1;
+        }
+
+        @Override
+        public int getNbPending() {
+            return channel != null ? channel.getNbPending() : -1;
         }
 
         private synchronized void saveMessage(Serializable message) {
@@ -355,10 +364,10 @@ import java.util.stream.Collectors;
         }
 
         @Override
-        public boolean activate(String engineUuid) {
+        public boolean activate() {
             boolean activated = false;
             if (channel != null) {
-                activated = channel.activate(engineUuid);
+                activated = channel.activate();
                 if (activated) {
                     flushMessages(channel);
                 }
