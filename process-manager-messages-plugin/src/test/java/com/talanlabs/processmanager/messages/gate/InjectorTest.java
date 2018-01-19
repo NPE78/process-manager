@@ -180,7 +180,7 @@ public class InjectorTest {
         }
 
         @Override
-        public void doWork(E flux, String engineUuid) {
+        public void doWork(E flux) {
             File file = flux.getFile();
             File dest = new File(getAcceptedPath(), file.getName());
             boolean renamed = file.renameTo(dest);

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class GateFactory extends EngineAddon<GateFactory> {
+public final class GateFactory extends EngineAddon<GateFactory> {
 
     private final List<Gate> gateList;
 

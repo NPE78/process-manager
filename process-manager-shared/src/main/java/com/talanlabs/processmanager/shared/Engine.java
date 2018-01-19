@@ -50,9 +50,14 @@ public interface Engine extends MessageHandler {
     void setAvailable(String channelName, boolean available);
 
     /**
-     * Returns the number of working agents on the given channel
+     * Returns the number of agents threads working right now on the given channel
      */
     int getNbWorking(String channelName);
+
+    /**
+     * Returns the number of agents threads waiting to be activated on the given channel
+     */
+    int getNbPending(String channelName);
 
     interface IEngineAddon {
 

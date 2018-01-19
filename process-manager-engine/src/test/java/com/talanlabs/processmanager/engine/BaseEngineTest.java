@@ -196,7 +196,7 @@ public class BaseEngineTest {
     private class TestAgent implements Agent {
 
         @Override
-        public void work(Serializable message, String engineUuid) {
+        public void work(Serializable message) {
             try {
                 logService.info(() -> "TestAgent is waiting for the countDownLatch to be consumed");
                 countDownLatch.await();

@@ -13,7 +13,7 @@ public class ProcessingChannelTest {
     public void testHeartbeat() throws BaseEngineCreationException {
         Engine engine = PM.get().createEngine("testHeartbeat", TestUtils.getErrorPath());
         try {
-            Agent agent = (message, engineUuid) -> {
+            Agent agent = (message) -> {
             };
 
             MyChannel channel = new MyChannel(agent);

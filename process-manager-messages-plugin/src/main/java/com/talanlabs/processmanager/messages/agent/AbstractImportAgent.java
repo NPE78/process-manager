@@ -66,9 +66,9 @@ public abstract class AbstractImportAgent<M extends AbstractImportFlux> implemen
 
     @SuppressWarnings("unchecked")
     @Override
-    public final void work(Serializable message, String engineUuid) {
+    public final void work(Serializable message) {
         if (isConcerned(message)) {
-            doWork((M) message, engineUuid);
+            doWork((M) message);
         } else {
             logService.warn(() -> "Agent {0} received a message it could not understand: {1}", getName(), message != null ? message.getClass() : "null");
         }
@@ -78,7 +78,7 @@ public abstract class AbstractImportAgent<M extends AbstractImportFlux> implemen
         return message != null && fluxClass.isAssignableFrom(message.getClass());
     }
 
-    public abstract void doWork(M flux, String engineUuid);
+    public abstract void doWork(M flux);
 
     /**
      * Register this agent as a agent which is triggered to manage files.<br>
@@ -212,7 +212,7 @@ public abstract class AbstractImportAgent<M extends AbstractImportFlux> implemen
         }
 
         @Override
-        public void work(Serializable message, String engineUuid) {
+        public void work(Serializable message) {
             // this method cannot be called, the simple agent is not linked to a channel
         }
     }

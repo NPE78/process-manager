@@ -7,8 +7,14 @@ import java.io.Serializable;
 
 public final class RetryAgent implements Agent {
 
+    private final String engineUuid;
+
+    public RetryAgent(String engineUuid) {
+        this.engineUuid = engineUuid;
+    }
+
     @Override
-    public void work(Serializable message, String engineUuid) {
+    public void work(Serializable message) {
         if (message instanceof AbstractFlux) {
             AbstractFlux flux = (AbstractFlux) message;
             if (flux.retry()) {

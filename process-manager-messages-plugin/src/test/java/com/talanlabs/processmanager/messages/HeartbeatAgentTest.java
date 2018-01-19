@@ -37,7 +37,7 @@ public class HeartbeatAgentTest {
         try {
             HeartbeatAgent agent = new HeartbeatAgent("myChannel", "BEAT", 10);
 
-            engine.plugChannel(new MyHeartbeatChannel((message, engineUuid) -> count.count++));
+            engine.plugChannel(new MyHeartbeatChannel((message) -> count.count++));
             engine.activateChannels();
 
             Assertions.assertThat(count.count).isEqualTo(0);

@@ -17,17 +17,21 @@ public interface Channel {
     void setAvailable(boolean available);
 
     /**
-     * @return The number of agents working right now
+     * @return The number of agents threads working right now
      */
     int getNbWorking();
+
+    /**
+     * @return The number of agents threads waiting to be activated
+     */
+    int getNbPending();
 
     boolean isLocal();
 
     /**
-     * Activates the channel on the given engine uuid.
-     * If it already was activated on another engine, throws a ChannelStateException
+     * Activates the channel
      */
-    boolean activate(String engineUuid);
+    boolean activate();
 
     /**
      * At least one agent is working

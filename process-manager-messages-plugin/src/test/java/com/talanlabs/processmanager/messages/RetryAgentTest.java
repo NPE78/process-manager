@@ -10,12 +10,13 @@ import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.UUID;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
 
 public class RetryAgentTest {
 
@@ -71,16 +72,16 @@ public class RetryAgentTest {
     private class MyRetryChannel extends ProcessingChannel {
 
         MyRetryChannel() {
-            super("retryChannel", 5, new RetryAgent());
+            super("retryChannel", 5, new RetryAgent("testRetry"));
         }
     }
 
     private class MyExceptionAgent implements Agent {
 
         @Override
-        public void work(Serializable message, String engineUuid) {
+        public void work(Serializable message) {
             logService.info(() -> "Received message of type " + message.getClass());
-            PM.getEngine(engineUuid).handle("retryChannel", message);
+            PM.getEngine("testRetry").handle("retryChannel", message);
         }
     }
 

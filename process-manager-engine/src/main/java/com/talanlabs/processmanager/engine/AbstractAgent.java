@@ -35,6 +35,10 @@ public abstract class AbstractAgent implements Agent {
         this.engineUuid = engineUuid;
     }
 
+    public final String getEngineUuid() {
+        return engineUuid;
+    }
+
     /**
      * Register the agent to the engine and create a processing channel
      */

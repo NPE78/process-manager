@@ -9,11 +9,12 @@ import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
 
 public class CronAgentTest {
 
@@ -36,7 +37,7 @@ public class CronAgentTest {
         try {
             agent = new CronAgent("myChannel", "BEAT", "* * * * *");
 
-            engine.plugChannel(new MyCronChannel((message, engineUuid) -> {
+            engine.plugChannel(new MyCronChannel((message) -> {
             }));
             engine.activateChannels();
 

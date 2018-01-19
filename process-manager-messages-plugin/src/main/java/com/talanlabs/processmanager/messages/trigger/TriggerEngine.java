@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * The trigger engine is the default trigger manager with the process-manager-messages-plugin.
  */
-public class TriggerEngine extends EngineAddon<TriggerEngine> implements TriggerManager {
+public final class TriggerEngine extends EngineAddon<TriggerEngine> implements TriggerManager {
 
     private final TriggerManager manager;
     private final TriggerEventListenerBroker triggerEventListenerBroker;

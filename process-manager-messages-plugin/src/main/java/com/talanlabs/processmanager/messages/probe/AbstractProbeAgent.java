@@ -14,7 +14,7 @@ public abstract class AbstractProbeAgent implements ProbeAgent {
     }
 
     @Override
-    public void work(Serializable message, String engineUuid) {
+    public void work(Serializable message) {
         synchronized (this) {
             if (SupportedMessages.STOP == message) {
                 shutdown();
@@ -47,7 +47,7 @@ public abstract class AbstractProbeAgent implements ProbeAgent {
         };
 
         PM.getEngine(engineUuid).plugChannel(pluggableChannel);
-        pluggableChannel.activate(engineUuid);
+        pluggableChannel.activate();
     }
 
     /**
