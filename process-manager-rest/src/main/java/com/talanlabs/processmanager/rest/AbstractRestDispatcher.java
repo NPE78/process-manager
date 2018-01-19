@@ -96,7 +96,7 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
         }
     }
 
-    private Object getLock(String method) {
+    protected final Object getLock(String method) {
         switch (method) {
             case "GET":
                 return getLock;
