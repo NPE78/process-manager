@@ -1,11 +1,16 @@
 package com.talanlabs.processmanager.messages.helper;
 
-import java.util.Calendar;
+import com.talanlabs.processmanager.messages.exceptions.SynchronizationException;
 import org.apache.commons.lang3.time.FastDateFormat;
+
+import java.util.Calendar;
+import java.util.concurrent.Semaphore;
 
 public class IncrementHelper {
 
     private final FastDateFormat dateFormat;
+
+    private final Semaphore semaphore = new Semaphore(1);
 
     private volatile Integer increment;
 
@@ -44,8 +49,15 @@ public class IncrementHelper {
      * @return the computed string
      */
     public String getUniqueDate() {
-        Calendar now = Calendar.getInstance();
-        return dateFormat.format(now.getTime()) + "_" + getIncrement(now);
+        try {
+            semaphore.acquire();
+            Calendar now = Calendar.getInstance();
+            return dateFormat.format(now.getTime()) + "_" + getIncrement(now);
+        } catch (InterruptedException e) {
+            throw new SynchronizationException(e);
+        } finally {
+            semaphore.release();
+        }
     }
 
     /**

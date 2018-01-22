@@ -77,8 +77,6 @@ public class IncrementHelperTest {
                 } catch (AssertionError e) {
                     logService.info(() -> "{0} has already been added", uniqueDate);
                     exceptions.add(uniqueDate);
-                    cdl3.countDown();
-                    throw e;
                 }
                 cdl3.countDown();
             } catch (InterruptedException e) {
