@@ -18,6 +18,7 @@ public class RestAgentUnitTest {
         test("PUT");
         test("PATCH");
         test("DELETE");
+        test("default");
     }
 
     private void test(String method) throws InterruptedException {
@@ -40,31 +41,31 @@ public class RestAgentUnitTest {
     }
 
     private void testLock(CountDownLatch cdlStart, CountDownLatch cdlToWait, CountDownLatch cdlShared, CountDownLatch cdlShared2,
-                          boolean writeMode, List<String> errors, Object get) {
+                          boolean writeMode, List<String> errors, Object method) {
         cdlStart.countDown();
         try {
             cdlToWait.await();
             if (writeMode) {
-                acquireLock(cdlShared, cdlShared2, get);
+                acquireLock(cdlShared, cdlShared2, method);
             } else {
-                waitLock(cdlShared, cdlShared2, get);
+                waitLock(cdlShared, cdlShared2, method);
             }
         } catch (Throwable e) {
             errors.add("BUG");
         }
     }
 
-    private void waitLock(CountDownLatch cdlShared, CountDownLatch cdlShared2, Object get) throws InterruptedException {
+    private void waitLock(CountDownLatch cdlShared, CountDownLatch cdlShared2, Object method) throws InterruptedException {
         cdlShared.await();
-        synchronized (get) {
+        synchronized (method) {
             System.out.println("acquire sync for wait");
             System.out.println("release sync for wait");
             cdlShared2.countDown();
         }
     }
 
-    private void acquireLock(CountDownLatch cdlShared, CountDownLatch cdlShared2, Object get) throws InterruptedException {
-        synchronized (get) {
+    private void acquireLock(CountDownLatch cdlShared, CountDownLatch cdlShared2, Object method) throws InterruptedException {
+        synchronized (method) {
             System.out.println("acquire sync to write");
             cdlShared.countDown();
             Assertions.assertThat(cdlShared2.await(50, TimeUnit.MILLISECONDS)).isFalse();

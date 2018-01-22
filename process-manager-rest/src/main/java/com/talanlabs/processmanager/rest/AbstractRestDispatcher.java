@@ -121,7 +121,7 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
             Engine engine = PM.getEngine(agent.getEngineUuid());
             int nbPending = engine.getNbPending(agent.getName());
             int maxWaiting = agent.getMaxWaiting();
-            if (nbPending >= maxWaiting) {
+            if ((nbPending >= maxWaiting && maxWaiting != 0) || (maxWaiting == 0 && engine.isBusy(agent.getName()))) {
                 throw new HaltException(HttpStatus.TOO_MANY_REQUESTS_429, "Too many calls");
             } else {
                 if (shouldLock()) {
@@ -149,10 +149,14 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
 
     private void waitForLock(CountDownLatch cdl) {
         try {
-            cdl.await(getTimeout(), TimeUnit.MILLISECONDS);
+            boolean await = cdl.await(getTimeout(), TimeUnit.MILLISECONDS);
+            if (!await) {
+                logService.warn(() -> "Timeout exceeded for " + getName());
+                throw new HaltException(HttpStatus.REQUEST_TIMEOUT_408, "Timeout");
+            }
         } catch (InterruptedException e) {
-            logService.warn(() -> "Timeout exceeded for " + getName());
-            throw new HaltException(HttpStatus.REQUEST_TIMEOUT_408, "Timeout");
+            logService.warn(() -> getName() + " has been interrupted");
+            throw new HaltException(HttpStatus.GONE_410, "Interrupted");
         }
     }
 

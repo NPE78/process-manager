@@ -7,11 +7,12 @@ import com.talanlabs.processmanager.shared.exceptions.AddonAlreadyBoundException
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.concurrent.CountDownLatch;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
 
 public class BaseEngineTest {
 
@@ -51,6 +52,7 @@ public class BaseEngineTest {
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
             Assertions.assertThat(engine.isOverloaded(channelName)).isFalse();
             Assertions.assertThat(engine.getNbWorking(channelName)).isEqualTo(0);
+            Assertions.assertThat(engine.getNbPending(channelName)).isEqualTo(0);
             Assertions.assertThat(engine.getPluggedChannels()).hasSize(1);
             Assertions.assertThat(channel.getAgent().getClass().getSimpleName()).isEqualTo("TestAgent");
 
@@ -61,6 +63,7 @@ public class BaseEngineTest {
             Assertions.assertThat(engine.isAvailable(channelName)).isTrue();
             Assertions.assertThat(engine.isBusy(channelName)).isTrue();
             Assertions.assertThat(engine.getNbWorking(channelName)).isEqualTo(1);
+            Assertions.assertThat(engine.getNbPending(channelName)).isEqualTo(0);
 
             countDownLatch.countDown();
 

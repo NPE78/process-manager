@@ -30,13 +30,13 @@ public final class RestAddon extends EngineAddon<RestAddon> {
         javalin.port(port).start();
     }
 
-    public void bindAgent(IRestDispatcher restBaseAgent) {
+    public void bindDispatcher(IRestDispatcher restDispatcher) {
         synchronized (routeMap) {
-            if (routeMap.containsKey(restBaseAgent.getName())) {
-                throw new RestServerException("The route " + restBaseAgent.getName() + " exists already!");
+            if (routeMap.containsKey(restDispatcher.getName())) {
+                throw new RestServerException("The route " + restDispatcher.getName() + " exists already!");
             } else {
-                javalin.routes(() -> ApiBuilder.path(restBaseAgent.getName(), restBaseAgent));
-                routeMap.put(restBaseAgent.getName(), restBaseAgent);
+                javalin.routes(() -> ApiBuilder.path(restDispatcher.getName(), restDispatcher));
+                routeMap.put(restDispatcher.getName(), restDispatcher);
             }
         }
     }

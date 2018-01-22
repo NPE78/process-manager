@@ -33,7 +33,7 @@ public class RestDispatcherTest {
             RestAddon restAddon = RestAddon.register("rest");
             restAddon.start(8080);
 
-            restAddon.bindAgent(myRestAgent);
+            restAddon.bindDispatcher(myRestAgent);
 
             myRestAgent.register();
 
@@ -76,14 +76,14 @@ public class RestDispatcherTest {
     public void testNotInitialized() throws BaseEngineCreationException, InterruptedException {
         Engine engine = PM.get().createEngine("rest", TestUtils.getErrorPath());
         try {
-            MyRestDispatcher myRestAgent = new MyRestDispatcher();
+            MyRestDispatcher myRestDispatcher = new MyRestDispatcher();
 
             RestAddon restAddon = RestAddon.register("rest");
             restAddon.start(8080);
 
-            restAddon.bindAgent(myRestAgent);
+            restAddon.bindDispatcher(myRestDispatcher);
 
-            myRestAgent.register();
+            myRestDispatcher.register();
 
             RestAssured.given().when().post("http://localhost:8080/rest?hello=hi").then().statusCode(HttpStatus.METHOD_NOT_ALLOWED_405);
         } finally {
@@ -101,7 +101,7 @@ public class RestDispatcherTest {
             RestAddon restAddon = RestAddon.register("rest");
             restAddon.start(8080);
 
-            restAddon.bindAgent(myRestDispatcher);
+            restAddon.bindDispatcher(myRestDispatcher);
 
             myRestDispatcher.register();
 
