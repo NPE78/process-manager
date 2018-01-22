@@ -7,11 +7,12 @@ import com.talanlabs.processmanager.shared.Agent;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
 
 public class HeartbeatAgentTest {
 
@@ -44,7 +45,7 @@ public class HeartbeatAgentTest {
 
             agent.activate(engine.getUuid());
 
-            TestUtils.sleep(10);
+            TestUtils.sleep(15);
             int tmpCount = count.count;
             Assertions.assertThat(tmpCount).isBetween(0, 1);
 
