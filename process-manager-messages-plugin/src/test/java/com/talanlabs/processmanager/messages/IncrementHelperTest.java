@@ -68,7 +68,10 @@ public class IncrementHelperTest {
                 cdl.await();
 
                 String uniqueDate = IncrementHelper.getInstance().getUniqueDate();
-                boolean added = increments.add(uniqueDate);
+                boolean added;
+                synchronized (increments) {
+                    added = increments.add(uniqueDate);
+                }
                 try {
                     Assertions.assertThat(added).isTrue();
                 } catch (AssertionError e) {
