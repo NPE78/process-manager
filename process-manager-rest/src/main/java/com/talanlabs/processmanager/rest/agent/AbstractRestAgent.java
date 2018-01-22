@@ -57,7 +57,7 @@ public abstract class AbstractRestAgent extends AbstractAgent implements IRestAg
             if (lockedInfo != null && lockedInfo.getLockedCount() > 0) {
                 doWork(lockedMessage.getMessage(), lockedInfo.getContext());
             } else {
-                // if count down is consumed, the route has removed it because of a timeout
+                // if count down is consumed, the dispatcher has removed it because of a timeout, we do nothing but log
                 logService.warn(() -> "The message has expired");
             }
         } finally {
@@ -69,7 +69,7 @@ public abstract class AbstractRestAgent extends AbstractAgent implements IRestAg
     public final void removeLock(UUID lockId) {
         synchronized (synchronizationMap) {
             LockedInfo removed = synchronizationMap.remove(lockId);
-            if (removed != null && removed.getLockedCount() > 0) {
+            if (removed != null && removed.getLockedCount() > 0L) {
                 removed.countDown();
             }
         }
