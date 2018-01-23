@@ -6,7 +6,7 @@ import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationExceptio
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class EngineAddonTest {
+public class ITEngineAddon {
 
     @Test
     public void testEngineAddon() throws BaseEngineCreationException {

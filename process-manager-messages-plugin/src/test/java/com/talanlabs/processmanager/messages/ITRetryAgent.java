@@ -18,13 +18,13 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class RetryAgentTest {
+public class ITRetryAgent {
 
     private final LogService logService;
 
     private final File errorPath;
 
-    public RetryAgentTest() throws IOException {
+    public ITRetryAgent() throws IOException {
         logService = LogManager.getLogService(getClass());
 
         File tempFile = File.createTempFile("retryAgentTest", "tmp");

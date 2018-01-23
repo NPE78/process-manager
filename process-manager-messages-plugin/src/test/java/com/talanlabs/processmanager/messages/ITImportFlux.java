@@ -2,14 +2,15 @@ package com.talanlabs.processmanager.messages;
 
 import com.talanlabs.processmanager.messages.flux.AbstractImportFlux;
 import com.talanlabs.processmanager.shared.TestUtils;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
 
-public class ImportFluxTest {
+public class ITImportFlux {
 
     @Test
     public void testImportFlux() throws IOException {
