@@ -1,4 +1,4 @@
-package com.talanlabs.processmanager.example;
+package com.talanlabs.processmanager.example.message;
 
 import com.talanlabs.processmanager.messages.agent.AbstractImportAgent;
 import java.io.IOException;

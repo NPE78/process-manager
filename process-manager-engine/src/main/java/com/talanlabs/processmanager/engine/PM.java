@@ -2,6 +2,7 @@ package com.talanlabs.processmanager.engine;
 
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.Engine;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.Map;
@@ -18,12 +19,22 @@ public class PM {
         engineMap = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Returns the Process Manager (singleton instance)
+     */
     public static PM get() {
         return PM.SingletonHolder.instance;
     }
 
-    public static void handle(String uuid, String channelName, Serializable message) {
-        getEngine(uuid).handle(channelName, message);
+    /**
+     * Handle a message on a channel of given engine
+     *
+     * @param engineUuid  the uuid of the engine
+     * @param channelName the channel to send the message to
+     * @param message     the message
+     */
+    public static void handle(String engineUuid, String channelName, Serializable message) {
+        getEngine(engineUuid).handle(channelName, message);
     }
 
     /**

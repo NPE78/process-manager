@@ -5,11 +5,11 @@
     <parent>
         <artifactId>process-manager</artifactId>
         <groupId>com.talanlabs</groupId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>process-manager-rest</artifactId>
+    <artifactId>process-manager-rest-plugin</artifactId>
 
     <properties>
         <javalin.version>1.2.1</javalin.version>
@@ -28,12 +28,6 @@
         </dependency>
 
         <!-- test rest api -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>

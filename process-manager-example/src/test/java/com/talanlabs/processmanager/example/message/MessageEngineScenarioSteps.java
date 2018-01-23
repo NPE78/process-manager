@@ -1,4 +1,4 @@
-package com.talanlabs.processmanager.example;
+package com.talanlabs.processmanager.example.message;
 
 import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.messages.gate.GateFactory;
@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class EngineScenarioSteps {
+public class MessageEngineScenarioSteps {
 
     private MyImportAgent agent;
     private File testFlux;
@@ -24,8 +24,8 @@ public class EngineScenarioSteps {
     private String expectedContent;
     private String obtainedContent;
 
-    @Given("^engine is created$")
-    public void engineIsCreated() throws Throwable {
+    @Given("^message engine is created$")
+    public void messageEngineIsCreated() throws Throwable {
         Engine engine = PM.get().createEngine(getClass().getSimpleName(), TestUtils.getErrorPath());
         engine.addAddon(TriggerEngine.register(engine.getUuid())); // adding twice to test it is not blocking
         engine.addAddon(GateFactory.register(engine.getUuid())); // adding twice to test it is not blocking
@@ -48,7 +48,7 @@ public class EngineScenarioSteps {
         agent.register(getClass().getSimpleName(), 5, 100, TestUtils.getErrorPath());
     }
 
-    @And("^engine is initialized$")
+    @And("^message engine is initialized$")
     public void engineIsInitialized() throws Throwable {
         Engine engine = PM.getEngine(getClass().getSimpleName());
         engine.activateChannels();
@@ -105,8 +105,8 @@ public class EngineScenarioSteps {
         Assertions.assertThat(obtainedContent).isEqualTo(expectedContent);
     }
 
-    @Then("^shutdown the engine$")
-    public void shutdownTheEngine() {
+    @Then("^shutdown the message engine$")
+    public void shutdownTheMessageEngine() {
         PM.get().shutdownEngine(getClass().getSimpleName());
     }
 }

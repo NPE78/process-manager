@@ -75,6 +75,11 @@ public abstract class AbstractRestAgent extends AbstractAgent implements IRestAg
         }
     }
 
+    @Override
+    public boolean shouldLock() {
+        return true;
+    }
+
     protected abstract void doWork(Serializable message, Context context);
 
 }
