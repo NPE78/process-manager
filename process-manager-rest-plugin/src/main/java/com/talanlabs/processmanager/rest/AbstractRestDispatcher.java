@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * This dispatcher is managing the maxWaiting number of REST contexts waiting for each REST agent<br>
  * The HTTP statuses can be:<br>
  * 405 (METHOD_NOT_ALLOWED) if the method is not allowed<br>
- * 410 (GONE), only when the agent is synchronized (see {@link #shouldLock()}), is thrown when the agent times out ({@link #getTimeout()})<br>
+ * 410 (GONE), only when the agent is synchronized (see {@link IRestAgent#shouldLock()}), is thrown when the agent times out ({@link #getTimeout()})<br>
  * 429 (TOO_MANY_REQUESTS) if the agent is overloaded<br>
  * 503 (SERVICE_UNAVAILABLE) if the agent is not registered (not started) to an engine or the route is disconnected (stopped)
  */
@@ -125,7 +125,7 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
             if ((nbPending >= maxWaiting && maxWaiting != 0) || (maxWaiting == 0 && engine.isBusy(agent.getName()))) {
                 throw new HaltException(HttpStatus.TOO_MANY_REQUESTS_429, "Too many calls");
             } else {
-                if (shouldLock()) {
+                if (agent.shouldLock()) {
                     cdl = synchronizedHandle(context, agent, engine, message);
                 } else {
                     simpleHandle(agent, engine, message);
@@ -159,13 +159,6 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
             logService.warn(() -> getName() + " has been interrupted");
             throw new HaltException(HttpStatus.GONE_410, "Interrupted");
         }
-    }
-
-    /**
-     * Should the handle wait for an answer?
-     */
-    protected boolean shouldLock() {
-        return true;
     }
 
     /**

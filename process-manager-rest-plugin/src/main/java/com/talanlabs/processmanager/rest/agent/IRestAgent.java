@@ -30,4 +30,9 @@ public interface IRestAgent extends Agent {
 
     void removeLock(UUID lockId);
 
+    /**
+     * Should the handle wait for an answer?
+     */
+    boolean shouldLock();
+
 }

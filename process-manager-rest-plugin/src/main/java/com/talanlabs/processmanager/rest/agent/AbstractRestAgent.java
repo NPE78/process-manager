@@ -68,11 +68,21 @@ public abstract class AbstractRestAgent extends AbstractAgent implements IRestAg
     @Override
     public final void removeLock(UUID lockId) {
         synchronized (synchronizationMap) {
+            try {
+                throw new RuntimeException();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             LockedInfo removed = synchronizationMap.remove(lockId);
             if (removed != null && removed.getLockedCount() > 0L) {
                 removed.countDown();
             }
         }
+    }
+
+    @Override
+    public boolean shouldLock() {
+        return true;
     }
 
     protected abstract void doWork(Serializable message, Context context);
