@@ -7,7 +7,7 @@ import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationExceptio
 import com.talanlabs.processmanager.shared.exceptions.NotStartedChannelException;
 import org.junit.Test;
 
-public class ProcessingChannelTest {
+public class ITProcessingChannel {
 
     @Test(expected = NotStartedChannelException.class)
     public void testHeartbeat() throws BaseEngineCreationException {

@@ -16,11 +16,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
-public class CronAgentTest {
+public class ITCronAgent {
 
     private final File basePath;
 
-    public CronAgentTest() throws IOException {
+    public ITCronAgent() throws IOException {
         File tempFile = File.createTempFile("heartbeatAgentTest", "tmp");
         File tmpFolder = tempFile.getParentFile();
         basePath = new File(tmpFolder, UUID.randomUUID().toString());

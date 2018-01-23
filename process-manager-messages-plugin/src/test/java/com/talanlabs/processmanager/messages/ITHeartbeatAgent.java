@@ -14,13 +14,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
-public class HeartbeatAgentTest {
+public class ITHeartbeatAgent {
 
     private final File basePath;
 
     private final Count count;
 
-    public HeartbeatAgentTest() throws IOException {
+    public ITHeartbeatAgent() throws IOException {
         File tempFile = File.createTempFile("heartbeatAgentTest", "tmp");
         File tmpFolder = tempFile.getParentFile();
         basePath = new File(tmpFolder, UUID.randomUUID().toString());

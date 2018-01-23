@@ -8,14 +8,15 @@ import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
 import com.talanlabs.processmanager.shared.logging.LogManager;
 import com.talanlabs.processmanager.shared.logging.LogService;
-import java.io.File;
-import java.io.IOException;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InjectorTest {
+import java.io.File;
+import java.io.IOException;
+
+public class ITInjector {
 
     @Before
     public void before() throws BaseEngineCreationException {

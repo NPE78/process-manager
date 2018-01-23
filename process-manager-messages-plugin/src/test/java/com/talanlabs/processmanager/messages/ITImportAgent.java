@@ -14,7 +14,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
-public class ImportAgentTest {
+public class ITImportAgent {
 
     @Test
     public void testFileAgent() throws BaseEngineCreationException, InterruptedException, IOException {

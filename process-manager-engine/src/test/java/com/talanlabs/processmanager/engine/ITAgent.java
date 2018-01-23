@@ -4,11 +4,12 @@ import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.AgentException;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
-import java.io.Serializable;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-public class AgentTest {
+import java.io.Serializable;
+
+public class ITAgent {
 
     @Test(expected = AgentException.class)
     public void testAgentExceptionNoEngine() {
