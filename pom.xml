@@ -6,7 +6,7 @@
 
     <groupId>com.talanlabs</groupId>
     <artifactId>process-manager</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Process Manager</name>
@@ -43,7 +43,6 @@
         <system>gitlab</system>
         <url>https://gitlab.talanlabs.com/nicolas-poste/process-manager/issues</url>
     </issueManagement>
-
 
     <properties>
         <license.mailto>nicolas.poste@talan.com</license.mailto>
