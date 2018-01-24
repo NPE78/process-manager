@@ -52,7 +52,7 @@ After creating a probe agent, use `agent#activate(String engineUuid)` to activat
 
 ### Lightweight server
 
-The REST addon launches a lightweight server (javelin) on a specified port. Use `RESTAddon#register(String engineUuid)` to use this addon with an engine.
+The REST addon launches a lightweight server (javalin) on a specified port. Use `RESTAddon#register(String engineUuid)` to use this addon with an engine.
 
 ### REST dispatcher
 
