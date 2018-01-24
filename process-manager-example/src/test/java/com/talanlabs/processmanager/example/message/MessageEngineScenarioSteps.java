@@ -5,6 +5,7 @@ import com.talanlabs.processmanager.messages.gate.GateFactory;
 import com.talanlabs.processmanager.messages.trigger.TriggerEngine;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
+import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -105,8 +106,8 @@ public class MessageEngineScenarioSteps {
         Assertions.assertThat(obtainedContent).isEqualTo(expectedContent);
     }
 
-    @Then("^shutdown the message engine$")
-    public void shutdownTheMessageEngine() {
+    @After
+    public void after() {
         PM.get().shutdownEngine(getClass().getSimpleName());
     }
 }

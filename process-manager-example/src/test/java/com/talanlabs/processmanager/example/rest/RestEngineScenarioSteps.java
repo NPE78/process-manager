@@ -6,6 +6,7 @@ import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.rest.RestAddon;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
+import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -21,18 +22,18 @@ public class RestEngineScenarioSteps {
 
     private ValidatableResponse validatableResponse;
 
-    @Given("^rest engine is created$")
+    @Given("^REST engine is created$")
     public void restEngineIsCreated() throws Throwable {
         engine = PM.get().createEngine(getClass().getSimpleName(), TestUtils.getErrorPath());
     }
 
-    @And("^rest addon is created and added to the engine$")
+    @And("^REST addon is created and added to the engine$")
     public void restAddonIsCreatedAndAddedToTheEngine() {
         restAddon = RestAddon.register(engine.getUuid());
         restAddon.start(8080);
     }
 
-    @And("^rest agents are created and registered$")
+    @And("^REST agents are created and registered$")
     public void agentIsCreatedAndRegistered() {
         agentGet = new MyRestAgent(true);
         agentGet.register(engine.getUuid(), 5);
@@ -41,13 +42,13 @@ public class RestEngineScenarioSteps {
         agentPost.register(engine.getUuid(), 5);
     }
 
-    @And("^rest dispatcher is created and registered$")
+    @And("^REST dispatcher is created and registered$")
     public void restDispatcherIsCreatedAndRegistered() {
         MyRestDispatcher myRestDispatcher = new MyRestDispatcher(agentGet, agentPost);
         restAddon.bindDispatcher(myRestDispatcher);
     }
 
-    @And("^rest engine is initialized$")
+    @And("^REST engine is initialized$")
     public void restEngineIsInitialized() {
         engine.activateChannels();
     }
@@ -72,8 +73,8 @@ public class RestEngineScenarioSteps {
         validatableResponse.content(Matchers.is(param));
     }
 
-    @Then("^shutdown the rest engine$")
-    public void shutdownTheRestEngine() {
+    @After
+    public void after() {
         PM.get().shutdownEngine(getClass().getSimpleName());
     }
 }

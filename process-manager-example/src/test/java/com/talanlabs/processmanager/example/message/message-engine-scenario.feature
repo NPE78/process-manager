@@ -10,9 +10,7 @@ Background:
 Scenario: Injecting a file which is correct
   When a valid file is received
   Then the file should be in the accepted folder
-  Then shutdown the message engine
 
 Scenario: Injecting a file which is invalid
   When an invalid file is received
   Then the file should be in the rejected folder
-  Then shutdown the message engine

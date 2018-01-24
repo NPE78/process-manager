@@ -50,6 +50,7 @@
 
         <jdk.min.version>1.8</jdk.min.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
@@ -57,9 +58,10 @@
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
 
-        <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.0</jacoco-maven-plugin.version>
         <sonar.jacoco.itReportPath>${user.dir}/target/coverage-reports/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco-ut.exec</sonar.jacoco.reportPath>
 
@@ -70,6 +72,8 @@
 
         <commons-lang3.version>3.6</commons-lang3.version>
         <commons-io.version>2.6</commons-io.version>
+
+        <guava.version>20.0</guava.version>
     </properties>
 
     <dependencies>
@@ -123,6 +127,11 @@
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -175,8 +184,11 @@
                     <source>${jdk.min.version}</source>
                     <target>${jdk.min.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <proc>none</proc>
                 </configuration>
             </plugin>
+
+            <!-- test coverage -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -201,7 +213,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete file="${project.build.directory}/coverage-reports/jacoco-it.exec" />
+                                <delete file="${project.build.directory}/coverage-reports/jacoco-it.exec"/>
                             </tasks>
                         </configuration>
                     </execution>
@@ -244,10 +256,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.14</version>
+                <version>${maven-failsafe-plugin.version}</version>
                 <configuration>
                     <!-- property set by jacoco-maven-plugin -->
                     <argLine>${itCoverageAgent}</argLine>
+                    <encoding>${project.reporting.outputEncoding}</encoding>
                 </configuration>
                 <executions>
                     <execution>

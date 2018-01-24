@@ -1,11 +1,13 @@
 package com.talanlabs.processmanager.messages.trigger;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.talanlabs.processmanager.engine.EngineAddon;
 import com.talanlabs.processmanager.messages.trigger.api.Trigger;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerEvent;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerEventListener;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerManager;
 import com.talanlabs.processmanager.messages.trigger.api.TriggerManagerEventListener;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ public final class TriggerEngine extends EngineAddon<TriggerEngine> implements T
     private final TriggerManager manager;
     private final TriggerEventListenerBroker triggerEventListenerBroker;
 
+    @VisibleForTesting
     /* package protected */ TriggerEngine(String engineUuid) {
         super(TriggerEngine.class, engineUuid);
 

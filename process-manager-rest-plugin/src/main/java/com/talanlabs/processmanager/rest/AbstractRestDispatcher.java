@@ -1,5 +1,6 @@
 package com.talanlabs.processmanager.rest;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.rest.agent.IRestAgent;
 import com.talanlabs.processmanager.rest.model.LockedMessage;
@@ -97,6 +98,7 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
         }
     }
 
+    @VisibleForTesting
     protected final Object getLock(String method) {
         switch (method) {
             case "GET":
