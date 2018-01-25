@@ -1,9 +1,13 @@
 package com.talanlabs.processmanager.example.rest;
 
 import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.response.ValidatableResponse;
+import com.jayway.restassured.specification.RequestSpecification;
 import com.talanlabs.processmanager.engine.PM;
+import com.talanlabs.processmanager.rest.IRestDispatcher;
 import com.talanlabs.processmanager.rest.RestAddon;
+import com.talanlabs.processmanager.rest.RestDispatcherBuilder;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
 import cucumber.api.java.After;
@@ -44,8 +48,9 @@ public class RestEngineScenarioSteps {
 
     @And("^REST dispatcher is created and registered$")
     public void restDispatcherIsCreatedAndRegistered() {
-        MyRestDispatcher myRestDispatcher = new MyRestDispatcher(agentGet, agentPost);
-        restAddon.bindDispatcher(myRestDispatcher);
+        RestDispatcherBuilder builder = new RestDispatcherBuilder();
+        IRestDispatcher restDispatcher = builder.get(agentGet).post(agentPost).build("rest");
+        restAddon.bindDispatcher(restDispatcher);
     }
 
     @And("^REST engine is initialized$")
@@ -71,6 +76,40 @@ public class RestEngineScenarioSteps {
     @And("^the content should be (.*)$")
     public void theContentShouldBe(String param) {
         validatableResponse.content(Matchers.is(param));
+    }
+
+    @Given("^A dispatcher contains an agent for every method$")
+    public void aDispatcherContainsAnAgentForEveryMethod() {
+        RestDispatcherBuilder builder = new RestDispatcherBuilder();
+        MyRestAgent agent = new MyRestAgent(false);
+        agent.register(getClass().getSimpleName(), 1);
+        builder.get(agent).post(agent).put(agent).patch(agent).delete(agent);
+        restAddon.bindDispatcher(builder.build("rest"));
+    }
+
+    @When("^an asynchronous url is called with (\\w+)$")
+    public void anAsynchronousUrlIsCalledWithMethod(String method) {
+        RequestSpecification when = RestAssured.given().when();
+        String path = "http://localhost:8080/rest";
+        Response response = null;
+        switch (method) {
+            case "get":
+                response = when.get(path);
+                break;
+            case "post":
+                response = when.post(path);
+                break;
+            case "put":
+                response = when.put(path);
+                break;
+            case "patch":
+                response = when.patch(path);
+                break;
+            case "delete":
+                response = when.delete(path);
+                break;
+        }
+        validatableResponse = response.then();
     }
 
     @After

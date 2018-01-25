@@ -4,7 +4,6 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.rest.agent.AbstractRestAgent;
-import com.talanlabs.processmanager.rest.agent.IRestAgent;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
@@ -28,14 +27,16 @@ public class RestDispatcherTest {
         CountDownLatch cdlStart = new CountDownLatch(1);
         CountDownLatch cdlEnd = new CountDownLatch(3);
         try {
-            MyRestDispatcher myRestAgent = new MyRestDispatcher();
+            MyRestDispatcher myRestDispatcher = new MyRestDispatcher();
+            MyAgentGet agentGet = new MyAgentGet();
+            myRestDispatcher.setAgentGet(agentGet);
 
             RestAddon restAddon = RestAddon.register("rest");
             restAddon.start(8080);
 
-            restAddon.bindDispatcher(myRestAgent);
+            restAddon.bindDispatcher(myRestDispatcher);
 
-            myRestAgent.register();
+            agentGet.register("rest", 1);
 
             engine.activateChannels();
 
@@ -77,13 +78,15 @@ public class RestDispatcherTest {
         Engine engine = PM.createEngine("rest", TestUtils.getErrorPath());
         try {
             MyRestDispatcher myRestDispatcher = new MyRestDispatcher();
+            MyAgentGet agentGet = new MyAgentGet();
+            myRestDispatcher.setAgentGet(agentGet);
 
             RestAddon restAddon = RestAddon.register("rest");
             restAddon.start(8080);
 
             restAddon.bindDispatcher(myRestDispatcher);
 
-            myRestDispatcher.register();
+            agentGet.register("rest", 1);
 
             RestAssured.given().when().post("http://localhost:8080/rest?hello=hi").then().statusCode(HttpStatus.METHOD_NOT_ALLOWED_405);
         } finally {
@@ -97,13 +100,15 @@ public class RestDispatcherTest {
         Engine engine = PM.createEngine("rest", TestUtils.getErrorPath());
         try {
             MyRestDispatcher myRestDispatcher = new MyRestDispatcher();
+            MyAgentGet agentGet = new MyAgentGet();
+            myRestDispatcher.setAgentGet(agentGet);
 
             RestAddon restAddon = RestAddon.register("rest");
             restAddon.start(8080);
 
             restAddon.bindDispatcher(myRestDispatcher);
 
-            myRestDispatcher.register();
+            agentGet.register("rest", 1);
 
             myRestDispatcher.clear();
 
@@ -125,26 +130,10 @@ public class RestDispatcherTest {
 
     private class MyRestDispatcher extends AbstractRestDispatcher {
 
-        private final MyAgentGet agentGet;
-
         MyRestDispatcher() {
             super("rest");
 
-            agentGet = new MyAgentGet();
-        }
-
-        @Override
-        protected long getTimeout() {
-            return 1000L;
-        }
-
-        @Override
-        protected IRestAgent agentGet() {
-            return agentGet;
-        }
-
-        void register() {
-            agentGet.register("rest", 1);
+            setTimeout(1000L);
         }
     }
 

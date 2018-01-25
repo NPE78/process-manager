@@ -3,6 +3,7 @@ package com.talanlabs.processmanager.rest;
 import com.google.common.annotations.VisibleForTesting;
 import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.rest.agent.IRestAgent;
+import com.talanlabs.processmanager.rest.exceptions.RestAgentException;
 import com.talanlabs.processmanager.rest.model.LockedMessage;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.logging.LogManager;
@@ -41,12 +42,20 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
     private final Object deleteLock = new Object();
     private final Object defaultLock = new Object();
 
+    private IRestAgent agentGet;
+    private IRestAgent agentPost;
+    private IRestAgent agentPut;
+    private IRestAgent agentPatch;
+    private IRestAgent agentDelete;
+
+    private long timeout;
+
     public AbstractRestDispatcher(String name) {
         logService = LogManager.getLogService(getClass());
 
         this.name = name;
 
-        activated = true;
+        this.timeout = 120L * 1000L; // default timeout is 2min
     }
 
     @Override
@@ -59,6 +68,8 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
      */
     @Override
     public final void addEndpoints() {
+        activated = true;
+
         dispatchGet(agentGet());
         dispatchPost(agentPost());
         dispatchPut(agentPut());
@@ -163,32 +174,68 @@ public abstract class AbstractRestDispatcher implements IRestDispatcher {
         }
     }
 
+    public long getTimeout() {
+        return timeout;
+    }
+
     /**
      * The timeout in case the lock is used
      */
-    protected long getTimeout() {
-        return 120L * 1000L; // 2min
+    public final void setTimeout(long timeout) {
+        this.timeout = timeout;
     }
 
-
-    protected IRestAgent agentGet() {
-        return null;
+    /* package protected */
+    final IRestAgent agentGet() {
+        return agentGet;
     }
 
-    protected IRestAgent agentPost() {
-        return null;
+    /* package protected */
+    final IRestAgent agentPost() {
+        return agentPost;
     }
 
-    protected IRestAgent agentPut() {
-        return null;
+    /* package protected */
+    final IRestAgent agentPut() {
+        return agentPut;
     }
 
-    protected IRestAgent agentPatch() {
-        return null;
+    /* package protected */
+    final IRestAgent agentPatch() {
+        return agentPatch;
     }
 
-    protected IRestAgent agentDelete() {
-        return null;
+    /* package protected */
+    final IRestAgent agentDelete() {
+        return agentDelete;
+    }
+
+    /* package protected */
+    final void setAgentGet(IRestAgent agentGet) {
+        protectAgentSetter();
+        this.agentGet = agentGet;
+    }
+
+    /* package protected */  void setAgentPost(IRestAgent agentPost) {
+        this.agentPost = agentPost;
+    }
+
+    /* package protected */  void setAgentPut(IRestAgent agentPut) {
+        this.agentPut = agentPut;
+    }
+
+    /* package protected */  void setAgentPatch(IRestAgent agentPatch) {
+        this.agentPatch = agentPatch;
+    }
+
+    /* package protected */  void setAgentDelete(IRestAgent agentDelete) {
+        this.agentDelete = agentDelete;
+    }
+
+    private void protectAgentSetter() {
+        if (activated) {
+            throw new RestAgentException("Dispatcher is already active. It is impossible to set new REST agent");
+        }
     }
 
     @Override
