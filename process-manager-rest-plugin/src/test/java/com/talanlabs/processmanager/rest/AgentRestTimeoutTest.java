@@ -3,7 +3,6 @@ package com.talanlabs.processmanager.rest;
 import com.jayway.restassured.RestAssured;
 import com.talanlabs.processmanager.engine.PM;
 import com.talanlabs.processmanager.rest.agent.AbstractRestAgent;
-import com.talanlabs.processmanager.rest.agent.IRestAgent;
 import com.talanlabs.processmanager.shared.Engine;
 import com.talanlabs.processmanager.shared.TestUtils;
 import com.talanlabs.processmanager.shared.exceptions.BaseEngineCreationException;
@@ -24,11 +23,13 @@ public class AgentRestTimeoutTest {
             restAddon.start(8080);
 
             MyRestDispatcher restDispatcher = new MyRestDispatcher();
+            MyRestAgent agentGet = new MyRestAgent();
+            restDispatcher.setAgentGet(agentGet);
             Assertions.assertThat(restDispatcher.getTimeout()).isEqualTo(120L * 1000L);
 
             restAddon.bindDispatcher(restDispatcher);
 
-            restDispatcher.register();
+            agentGet.register("rest", 1);
             engine.activateChannels();
 
             RestAssured.given().when().get("http://localhost:8080/rest?hello=hi").then().statusCode(HttpStatus.OK_200);
@@ -44,34 +45,8 @@ public class AgentRestTimeoutTest {
 
     private class MyRestDispatcher extends AbstractRestDispatcher {
 
-        private final MyRestAgent agentGet;
-        private long timeout;
-
         MyRestDispatcher() {
             super("rest");
-
-            this.agentGet = new MyRestAgent();
-        }
-
-        @Override
-        protected IRestAgent agentGet() {
-            return agentGet;
-        }
-
-        @Override
-        protected long getTimeout() {
-            if (timeout == 0L) {
-                return super.getTimeout();
-            }
-            return timeout;
-        }
-
-        void setTimeout(long timeout) {
-            this.timeout = timeout;
-        }
-
-        void register() {
-            agentGet.register("rest", 1);
         }
     }
 
