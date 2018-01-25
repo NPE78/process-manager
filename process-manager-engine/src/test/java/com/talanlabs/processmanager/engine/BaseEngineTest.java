@@ -27,7 +27,7 @@ public class BaseEngineTest {
     @Test
     public void mainTest() throws BaseEngineCreationException, InterruptedException {
 
-        Engine engine = PM.get().createEngine("test", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("test", TestUtils.getErrorPath());
         try {
             String channelName = "channel";
             Assertions.assertThat(engine.isAvailable(channelName)).isFalse();
@@ -93,7 +93,7 @@ public class BaseEngineTest {
 
     @Test
     public void testAgentException() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = PM.get().createEngine("test", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("test", TestUtils.getErrorPath());
         try {
             String channelName = "exception";
 
@@ -127,19 +127,19 @@ public class BaseEngineTest {
             Assertions.assertThat(engine.isBusy(channelName)).isFalse();
 
         } finally {
-            PM.get().shutdownEngine("test");
+            PM.shutdownEngine("test");
         }
     }
 
     @Test(expected = BaseEngineCreationException.class)
     public void testCreatedTwice() throws BaseEngineCreationException {
-        PM.get().createEngine("test", TestUtils.getErrorPath());
+        PM.createEngine("test", TestUtils.getErrorPath());
         Assertions.assertThat(PM.getEngine("test").toString()).isEqualTo("Base Engine test");
         Assertions.assertThat(PM.getEngine("test")).isNotNull();
         try {
-            PM.get().createEngine("test", TestUtils.getErrorPath());
+            PM.createEngine("test", TestUtils.getErrorPath());
         } finally {
-            PM.get().shutdownEngine("test");
+            PM.shutdownEngine("test");
 
             Assertions.assertThat(PM.getEngine("test")).isNull();
         }
@@ -147,7 +147,7 @@ public class BaseEngineTest {
 
     @Test
     public void testProperties() throws BaseEngineCreationException, AddonAlreadyBoundException {
-        Engine engine = PM.get().createEngine("test", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("test", TestUtils.getErrorPath());
         try {
             MyEngineAddon myEngineAddon = createAddon(engine);
             Assertions.assertThat(engine.getAddon(myEngineAddon.getAddonClass()).isPresent()).isTrue();
@@ -159,7 +159,7 @@ public class BaseEngineTest {
 
     @Test(expected = AddonAlreadyBoundException.class)
     public void testPropertiesAlreadyBind() throws BaseEngineCreationException, AddonAlreadyBoundException {
-        Engine engine = PM.get().createEngine("test", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("test", TestUtils.getErrorPath());
         try {
             createAddon(engine);
             engine.addAddon(new MyEngineAddon("test"));

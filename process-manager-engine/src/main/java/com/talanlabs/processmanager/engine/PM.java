@@ -22,7 +22,7 @@ public class PM {
     /**
      * Returns the Process Manager (singleton instance)
      */
-    public static PM get() {
+    private static PM get() {
         return PM.SingletonHolder.instance;
     }
 
@@ -40,55 +40,69 @@ public class PM {
     /**
      * Build a process manager engine
      *
-     * @param uuid      Unique uuid of the engine
+     * @param engineUuid      Unique engineUuid of the engine
      * @param errorPath Path where the remaining messages will be stored when shutting down
      * @return the newly created engine
-     * @throws BaseEngineCreationException an exception can be thrown if a uuid is already used
+     * @throws BaseEngineCreationException an exception can be thrown if a engineUuid is already used
      */
-    public Engine createEngine(String uuid, File errorPath) throws BaseEngineCreationException {
+    public static Engine createEngine(String engineUuid, File errorPath) throws BaseEngineCreationException {
+        return get().createEngineInternal(engineUuid, errorPath);
+    }
+
+    private Engine createEngineInternal(String engineUuid, File errorPath) throws BaseEngineCreationException {
         synchronized (engineMap) {
-            if (engineMap.containsKey(uuid)) {
-                throw new BaseEngineCreationException(String.format("Base engine %s created twice!", uuid));
+            if (engineMap.containsKey(engineUuid)) {
+                throw new BaseEngineCreationException(String.format("Base engine %s created twice!", engineUuid));
             }
-            Engine engine = new BaseEngine(uuid, errorPath);
-            engineMap.put(uuid, engine);
+            Engine engine = new BaseEngine(engineUuid, errorPath);
+            engineMap.put(engineUuid, engine);
             return engine;
         }
     }
 
     /**
-     * Shuts down the engine corresponding to the given uuid
+     * Shuts down the engine corresponding to the given engineUuid
      *
-     * @param uuid the unique uuid of the engine
+     * @param engineUuid the unique engineUuid of the engine
      * @return true if the engine has stop, false otherwise
      */
-    public boolean shutdownEngine(String uuid) {
+    public static boolean shutdownEngine(String engineUuid) {
+        return get().shutdownEngineInternal(engineUuid);
+    }
+
+    private boolean shutdownEngineInternal(String engineUuid) {
         synchronized (engineMap) {
-            Engine engine = engineMap.get(uuid);
+            Engine engine = engineMap.get(engineUuid);
             if (engine != null) {
                 engine.shutdown();
             }
-            engineMap.remove(uuid);
+            engineMap.remove(engineUuid);
             return engine != null;
         }
     }
 
-    /* package protected */ void removeEngine(String engineUuid) {
+
+
+    /* package protected */ static void removeEngine(String engineUuid) {
+        get().removeEngineInternal(engineUuid);
+    }
+
+    private void removeEngineInternal(String engineUuid) {
         synchronized (engineMap) {
             engineMap.remove(engineUuid);
         }
     }
 
     /**
-     * Returns the engine associated to the given uuid
+     * Returns the engine associated to the given engineUuid
      */
-    public static Engine getEngine(String uuid) {
-        return get().getEngineInternal(uuid);
+    public static Engine getEngine(String engineUuid) {
+        return get().getEngineInternal(engineUuid);
     }
 
-    private Engine getEngineInternal(String uuid) {
+    private Engine getEngineInternal(String engineUuid) {
         synchronized (engineMap) {
-            return engineMap.get(uuid);
+            return engineMap.get(engineUuid);
         }
     }
 

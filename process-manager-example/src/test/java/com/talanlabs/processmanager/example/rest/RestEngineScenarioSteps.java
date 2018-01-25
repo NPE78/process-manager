@@ -24,7 +24,7 @@ public class RestEngineScenarioSteps {
 
     @Given("^REST engine is created$")
     public void restEngineIsCreated() throws Throwable {
-        engine = PM.get().createEngine(getClass().getSimpleName(), TestUtils.getErrorPath());
+        engine = PM.createEngine(getClass().getSimpleName(), TestUtils.getErrorPath());
     }
 
     @And("^REST addon is created and added to the engine$")
@@ -68,13 +68,13 @@ public class RestEngineScenarioSteps {
         validatableResponse.statusCode(expectedStatus);
     }
 
-    @And("^the content should be (\\w+)$")
+    @And("^the content should be (.*)$")
     public void theContentShouldBe(String param) {
         validatableResponse.content(Matchers.is(param));
     }
 
     @After
     public void after() {
-        PM.get().shutdownEngine(getClass().getSimpleName());
+        PM.shutdownEngine(getClass().getSimpleName());
     }
 }

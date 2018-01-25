@@ -38,7 +38,7 @@ public class ITRetryAgent {
 
     @Test
     public void testRetryAgent() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = PM.get().createEngine("testRetry", errorPath);
+        Engine engine = PM.createEngine("testRetry", errorPath);
         try {
             engine.plugChannel(new MyChannel());
             engine.plugChannel(new MyRetryChannel());

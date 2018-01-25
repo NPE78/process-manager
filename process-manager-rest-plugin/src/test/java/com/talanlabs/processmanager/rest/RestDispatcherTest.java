@@ -22,7 +22,7 @@ public class RestDispatcherTest {
 
     @Test
     public void testDispatcherAgent() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = PM.get().createEngine("rest", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("rest", TestUtils.getErrorPath());
         List<String> failures = new ArrayList<>(3);
         CountDownLatch cdlToConsume = new CountDownLatch(3);
         CountDownLatch cdlStart = new CountDownLatch(1);
@@ -74,7 +74,7 @@ public class RestDispatcherTest {
 
     @Test
     public void testNotInitialized() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = PM.get().createEngine("rest", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("rest", TestUtils.getErrorPath());
         try {
             MyRestDispatcher myRestDispatcher = new MyRestDispatcher();
 
@@ -94,7 +94,7 @@ public class RestDispatcherTest {
 
     @Test
     public void testDeactivated() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = PM.get().createEngine("rest", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("rest", TestUtils.getErrorPath());
         try {
             MyRestDispatcher myRestDispatcher = new MyRestDispatcher();
 

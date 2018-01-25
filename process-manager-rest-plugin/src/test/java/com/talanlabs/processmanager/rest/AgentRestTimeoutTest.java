@@ -18,7 +18,7 @@ public class AgentRestTimeoutTest {
 
     @Test
     public void testTimeout() throws BaseEngineCreationException {
-        Engine engine = PM.get().createEngine("rest", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("rest", TestUtils.getErrorPath());
         try {
             RestAddon restAddon = RestAddon.register("rest");
             restAddon.start(8080);
