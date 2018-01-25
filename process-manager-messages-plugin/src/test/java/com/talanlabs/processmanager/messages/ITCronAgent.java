@@ -32,7 +32,7 @@ public class ITCronAgent {
 
     @Test
     public void testCron() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = PM.get().createEngine("testCron", basePath);
+        Engine engine = PM.createEngine("testCron", basePath);
         CronAgent agent;
         try {
             agent = new CronAgent("myChannel", "BEAT", "* * * * *");
@@ -55,7 +55,7 @@ public class ITCronAgent {
 
     @Test(expected = AlreadyStartedProbeException.class)
     public void testCronTwice() throws BaseEngineCreationException {
-        Engine engine = PM.get().createEngine("testCron", basePath);
+        Engine engine = PM.createEngine("testCron", basePath);
         CronAgent agent;
         try {
             agent = new CronAgent("myChannel", "BEAT", "* * * * *");
@@ -72,7 +72,7 @@ public class ITCronAgent {
 
     @Test
     public void testCronStopHandle() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = PM.get().createEngine("testCron", basePath);
+        Engine engine = PM.createEngine("testCron", basePath);
         CronAgent agent;
         try {
             agent = new CronAgent("myChannel", "BEAT", "* * * * *");

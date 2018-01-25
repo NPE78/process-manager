@@ -34,7 +34,7 @@ public class ITHeartbeatAgent {
 
     @Test
     public void testHeartbeat() throws BaseEngineCreationException, InterruptedException {
-        Engine engine = PM.get().createEngine("testHeartbeat", basePath);
+        Engine engine = PM.createEngine("testHeartbeat", basePath);
         try {
             HeartbeatAgent agent = new HeartbeatAgent("myChannel", "BEAT", 10);
 

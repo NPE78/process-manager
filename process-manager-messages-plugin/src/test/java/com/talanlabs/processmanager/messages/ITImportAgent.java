@@ -18,7 +18,7 @@ public class ITImportAgent {
 
     @Test
     public void testFileAgent() throws BaseEngineCreationException, InterruptedException, IOException {
-        Engine engine = PM.get().createEngine("testFileAgent", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
             MyOtherAgent myAgent = new MyOtherAgent();
             myAgent.getLogService().info(() -> "Testing myAgent");
@@ -60,7 +60,7 @@ public class ITImportAgent {
 
     @Test
     public void testFileAgentReject() throws BaseEngineCreationException, IOException, InterruptedException {
-        Engine engine = PM.get().createEngine("testFileAgent", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
             MyAgent myAgent = new MyAgent();
 
@@ -85,7 +85,7 @@ public class ITImportAgent {
 
     @Test(expected = InjectorNotCreatedYetException.class)
     public void testAgentNotRegistered() throws BaseEngineCreationException {
-        Engine engine = PM.get().createEngine("testFileAgent", TestUtils.getErrorPath());
+        Engine engine = PM.createEngine("testFileAgent", TestUtils.getErrorPath());
         try {
             MyAgent myAgent = new MyAgent();
             myAgent.getLogService().info(() -> "Testing myAgent");

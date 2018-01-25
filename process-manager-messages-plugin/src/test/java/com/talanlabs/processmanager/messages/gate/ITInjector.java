@@ -20,12 +20,12 @@ public class ITInjector {
 
     @Before
     public void before() throws BaseEngineCreationException {
-        PM.get().createEngine("test", TestUtils.getErrorPath());
+        PM.createEngine("test", TestUtils.getErrorPath());
     }
 
     @After
     public void after() {
-        PM.get().shutdownEngine("test");
+        PM.shutdownEngine("test");
     }
 
     @Test

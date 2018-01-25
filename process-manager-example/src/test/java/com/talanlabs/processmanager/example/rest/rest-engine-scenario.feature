@@ -9,10 +9,18 @@ Feature: Rest Engine feature
     And REST dispatcher is created and registered
     And REST engine is initialized
 
-  Scenario: Calling synchronous REST api
-    When a synchronous url is called with hello param
-    Then the status should be 200
-    And the content should be hello
+  Scenario Outline: Calling synchronous REST api
+    When a synchronous url is called with <param> param
+    Then the status should be <status>
+    And the content should be <expectedAnswer>
+
+    Examples:
+      | param  | status | expectedAnswer |
+      | hello  | 200    | hi there!      |
+      | foo    | 200    | bar            |
+      | teapot | 418    |                |
+      | none   | 500    |                |
+
 
   Scenario: Calling asynchronous REST api
     When an asynchronous url is called

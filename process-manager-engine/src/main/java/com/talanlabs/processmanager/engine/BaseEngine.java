@@ -234,7 +234,7 @@ import java.util.stream.Collectors;
 
         logService.info(() -> "BaseEngine {0} has been shut down. There may still be messages waiting to be processed to completely shutdown", uuid);
 
-        PM.get().removeEngine(getUuid()); // to be sure the engine has been removed in the process manager also
+        PM.removeEngine(getUuid()); // to be sure the engine has been removed in the process manager also
     }
 
     private void storeMessages(ChannelSlot channelSlot) {

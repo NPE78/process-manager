@@ -27,7 +27,7 @@ public class MessageEngineScenarioSteps {
 
     @Given("^message engine is created$")
     public void messageEngineIsCreated() throws Throwable {
-        Engine engine = PM.get().createEngine(getClass().getSimpleName(), TestUtils.getErrorPath());
+        Engine engine = PM.createEngine(getClass().getSimpleName(), TestUtils.getErrorPath());
         engine.addAddon(TriggerEngine.register(engine.getUuid())); // adding twice to test it is not blocking
         engine.addAddon(GateFactory.register(engine.getUuid())); // adding twice to test it is not blocking
     }
@@ -108,6 +108,6 @@ public class MessageEngineScenarioSteps {
 
     @After
     public void after() {
-        PM.get().shutdownEngine(getClass().getSimpleName());
+        PM.shutdownEngine(getClass().getSimpleName());
     }
 }

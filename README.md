@@ -26,12 +26,12 @@ Useful classes to dispatch REST api to agents.
 
 ## Usage
 
-Use `PM.get().createEngine(String uuid, File errorPath)` to build a new instance of a process manager.
+Use `PM.createEngine(String uuid, File errorPath)` to build a new instance of a process manager.
 
 You can add any number of addons to an engine by using `Engine.addAddon(IEngineAddon engineAddon)`  
 After creating the engine and adding agents to it, use `engine#activateChannels()`
 
-To shutdown the whole engine, use `engine#shutdown` or `PM.get().shutdownEngine(String engineUuid)`
+To shutdown the whole engine, use `engine#shutdown` or `PM.shutdownEngine(String engineUuid)`
 
 ## Message Addon
 
